@@ -1,0 +1,86 @@
+.register-page {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #faf8f2;
+    padding: 40px;
+}
+
+.register-container {
+    width: 420px;
+    background: white;
+    border: 1px solid #e9e4db;
+    border-radius: 10px;
+    padding: 40px;
+}
+
+.register-container h2 {
+    font-family: 'Playfair Display', serif;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.register-sub {
+    text-align: center;
+    color: #777;
+    margin-bottom: 30px;
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.register-form label {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.register-form input {
+    padding: 10px;
+    margin-bottom: 18px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.register-btn {
+    background-color: #6f8f7b;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.register-login {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.register-login span {
+    color: #6f8f7b;
+    cursor: pointer;
+}
+
+.register-btn {
+    display: block;
+    text-align: center;
+    background-color: #6f8f7b;
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+@media (max-width: 480px) {
+    .register-page {
+        padding: 20px;
+    }
+
+    .register-container {
+        width: 100%;
+        padding: 30px 20px;
+    }
+}

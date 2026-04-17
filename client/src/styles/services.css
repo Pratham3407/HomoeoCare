@@ -1,0 +1,136 @@
+.services {
+    background-color: #faf8f2;
+    padding: 90px 20px;
+    text-align: center;
+}
+
+.services-container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.services h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: #2f2f2f;
+}
+
+.services-subtitle {
+    color: #777;
+    margin-bottom: 60px;
+    font-size: 15px;
+}
+
+/* ── Slider outer (holds arrows + track) ── */
+.slider-outer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ── Arrow buttons ── */
+.slider-arrow {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #2f2f2f;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    z-index: 2;
+}
+
+.slider-arrow:hover {
+    background: #2f2f2f;
+    color: #fff;
+    border-color: #2f2f2f;
+}
+
+/* ── Slider viewport ── */
+.slider-wrapper {
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+}
+
+.slider-track {
+    display: flex;
+    gap: 30px;
+}
+
+/* ── Cards ── */
+.service-card {
+    /* Each card = (100% - 3 gaps) / 4   →  always 4 visible */
+    min-width: calc((100% - 90px) / 4);
+    max-width: calc((100% - 90px) / 4);
+    flex-shrink: 0;
+    background-color: #ffffff;
+    border: 1px solid #e9e4db;
+    padding: 35px 25px;
+    border-radius: 12px;
+    text-align: left;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.icon-box {
+    width: 45px;
+    height: 45px;
+    background-color: #eef2ed;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    font-size: 20px;
+}
+
+.service-card h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #2f2f2f;
+}
+
+.service-card p {
+    font-size: 14px;
+    color: #666;
+}
+
+/* ── Responsive ── */
+@media (max-width: 992px) {
+    .service-card {
+        min-width: calc((100% - 30px) / 2);
+        max-width: calc((100% - 30px) / 2);
+    }
+}
+
+@media (max-width: 576px) {
+    .services h2 {
+        font-size: 30px;
+    }
+
+    .service-card {
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    .slider-arrow {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+    }
+}

@@ -1,0 +1,31 @@
+.qualifications {
+  padding: 80px 20px;
+  background-color: #ffffff;
+}
+
+.qualifications-container {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  gap: 60px;
+}
+
+.qualification-left,
+.qualification-right {
+  flex: 1;
+}
+
+.qualifications h2 {
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 20px;
+}
+
+.qualifications ul {
+  list-style: none;
+  padding: 0;
+}
+
+.qualifications li {
+  margin-bottom: 12px;
+  color: #555;
+}

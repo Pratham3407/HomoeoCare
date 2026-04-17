@@ -1,0 +1,73 @@
+.my-appointments-page {
+  padding: 40px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.my-appointments-page h2 {
+  margin-bottom: 6px;
+}
+
+.page-sub {
+  color: #888;
+  margin-bottom: 30px;
+}
+
+.no-data {
+  color: #aaa;
+  font-style: italic;
+  margin-top: 20px;
+}
+
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.appt-card {
+  background: #ffffff;
+  border: 1px solid #d5cfc4;
+  border-radius: 10px;
+  padding: 18px 22px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.appt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.appt-date {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #1a1a1a;
+}
+
+.appt-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.appt-badge.pending { background: #fef9e7; color: #d4910e; }
+.appt-badge.approved { background: #eafaf1; color: #27ae60; }
+.appt-badge.completed { background: #f0f0f0; color: #555; }
+.appt-badge.cancelled { background: #fdedec; color: #c0392b; }
+.appt-badge.postponed { background: #f4ecf7; color: #8e44ad; }
+
+.appt-card p {
+  margin: 4px 0;
+  color: #444;
+}
+
+.appt-reason {
+  font-style: italic;
+  color: #777;
+  font-size: 0.9rem;
+}

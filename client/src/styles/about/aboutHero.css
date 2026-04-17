@@ -1,0 +1,65 @@
+.about-hero {
+  background: linear-gradient(to right, #eef2ed, #faf8f2);
+  padding: 80px 20px;
+}
+
+.about-hero-container {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  gap: 60px;
+  align-items: center;
+}
+
+.about-hero-text {
+  flex: 1;
+}
+
+.about-label {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #6f8f7b;
+  font-weight: 600;
+}
+
+.about-hero-text h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 46px;
+  margin: 10px 0;
+}
+
+.about-degree {
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.about-hero-text p {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.about-hero-image {
+  flex: 1;
+}
+
+.about-doctor-image-container {
+  background: linear-gradient(135deg,#dde5de,#cdd9d0);
+  border-radius: 20px;
+  height: 420px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.about-doctor-portrait-img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  z-index: 1;
+  transform: scale(1.15);
+  transform-origin: bottom center;
+}

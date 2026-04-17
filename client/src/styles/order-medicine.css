@@ -1,0 +1,271 @@
+.order-medicine-page {
+  padding: 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.order-medicine-page h2 {
+  margin-bottom: 6px;
+}
+
+.page-sub {
+  color: #888;
+  margin-bottom: 30px;
+}
+
+.order-layout {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+/* Medicine List */
+.medicine-list {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.med-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #d5cfc4;
+  border-radius: 10px;
+  padding: 18px 20px;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.med-info h3 {
+  margin: 0 0 4px;
+}
+
+.med-desc {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0 0 6px;
+}
+
+.med-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0 0 4px;
+}
+
+.in-stock {
+  color: #27ae60;
+  font-size: 0.85rem;
+}
+
+.out-stock {
+  color: #c0392b;
+  font-size: 0.85rem;
+}
+
+.add-btn {
+  padding: 10px 18px;
+  background: #4a7c59;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.add-btn:hover {
+  background: #3d6a4b;
+}
+
+.add-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Cart */
+.cart-section {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #d5cfc4;
+  border-radius: 10px;
+  padding: 20px;
+  position: sticky;
+  top: 100px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.cart-section h3 {
+  margin: 0 0 14px;
+}
+
+.empty-cart {
+  color: #aaa;
+  font-style: italic;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cart-item-name {
+  font-weight: 600;
+}
+
+.cart-item-price {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.cart-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cart-item-controls button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-btn {
+  color: #c0392b !important;
+  border-color: #c0392b !important;
+}
+
+.cart-total {
+  margin-top: 14px;
+  text-align: right;
+  font-size: 1.1rem;
+}
+
+.checkout-btn {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  background: #4a7c59;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.checkout-btn:hover {
+  background: #3d6a4b;
+}
+
+/* Checkout Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.checkout-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 450px;
+  width: 90%;
+}
+
+.checkout-modal h3 {
+  margin: 0 0 16px;
+}
+
+.checkout-modal input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.payment-note {
+  font-size: 0.88rem;
+  color: #888;
+  margin: 12px 0;
+  padding: 10px;
+  background: #fef9e7;
+  border-radius: 6px;
+  border-left: 3px solid #d4910e;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #ffffff;
+  background: #4a7c59;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.modal-actions .btn-cancel {
+  background: #c0392b;
+}
+
+@media (max-width: 768px) {
+  .order-medicine-page {
+    padding: 20px 15px;
+  }
+
+  .order-layout {
+    flex-direction: column;
+  }
+
+  .cart-section {
+    position: static;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .med-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .add-btn {
+    width: 100%;
+  }
+
+  .medicine-list {
+    width: 100%;
+  }
+}

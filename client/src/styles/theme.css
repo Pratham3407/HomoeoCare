@@ -1,0 +1,21 @@
+:root {
+    --bg-color: #faf8f2;
+    --text-color: #2e2e2e;
+    --primary-color: #6f8f7b;
+    --primary-dark: #5c7666;
+    --border-color: #e6e1d8;
+    --card-bg: #fdfbf7;
+}
+
+body {
+    margin: 0;
+    font-family: 'Source Sans 3', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Playfair Display', serif;
+}

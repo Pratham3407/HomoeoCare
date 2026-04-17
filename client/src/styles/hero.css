@@ -1,0 +1,134 @@
+.hero {
+    background-color: #f7f4ee;
+    padding: 100px 20px;
+}
+
+.hero-container {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    padding: 60px 70px;
+}
+
+.hero-left {
+    flex: 1;
+}
+
+.hero-right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.hero-small {
+    color: #6f8f7b;
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    line-height: 1.2;
+}
+
+.hero h1 span {
+    color: #6f8f7b;
+}
+
+.hero-text {
+    margin-top: 20px;
+    font-size: 16px;
+    color: #555;
+    max-width: 500px;
+}
+
+.hero-buttons {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+}
+
+.primary-btn {
+    background-color: #6f8f7b;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.secondary-btn {
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.quote-card {
+    background: linear-gradient(to bottom right, #dde6df, #cfd9d2);
+    padding: 60px 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 450px;
+}
+
+.quote-icon {
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+.quote-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 18px;
+}
+
+.quote-author {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #666;
+}
+
+@media (max-width: 992px) {
+    .hero-container {
+        flex-direction: column;
+        padding: 40px 20px;
+        gap: 40px;
+        text-align: center;
+    }
+
+    .hero-text {
+        margin: 20px auto 0 auto;
+    }
+
+    .hero-buttons {
+        justify-content: center;
+    }
+
+    .hero h1 {
+        font-size: 36px;
+    }
+
+    .quote-card {
+        padding: 40px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 28px;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+    }
+
+    .primary-btn, .secondary-btn {
+        width: 100%;
+    }
+}

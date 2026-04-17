@@ -1,0 +1,40 @@
+.philosophy {
+  padding: 90px 20px;
+  background-color: #faf8f2;
+  text-align: center;
+}
+
+.philosophy-container {
+  max-width: 1100px;
+  margin: auto;
+}
+
+.philosophy h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 38px;
+  margin-bottom: 50px;
+}
+
+.philosophy-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 30px;
+}
+
+.philosophy-card {
+  background: white;
+  border: 1px solid #e9e4db;
+  border-radius: 12px;
+  padding: 30px;
+  text-align: left;
+}
+
+.philosophy-card h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.philosophy-card p {
+  color: #666;
+  font-size: 14px;
+}

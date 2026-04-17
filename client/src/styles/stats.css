@@ -1,0 +1,37 @@
+.stats {
+    background-color: #faf8f2;
+    border-top: 1px solid #e9e4db;
+    border-bottom: 1px solid #e9e4db;
+    padding: 70px 20px;
+}
+
+.stats-container {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+}
+
+.stat h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 34px;
+    color: #6f8f7b;
+    margin-bottom: 8px;
+}
+
+.stat p {
+    font-size: 14px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .stats-container {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .stat h2 {
+        font-size: 28px;
+    }
+}

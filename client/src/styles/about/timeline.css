@@ -1,0 +1,36 @@
+.timeline {
+  padding: 90px 20px;
+  background-color: white;
+}
+
+.timeline-container {
+  max-width: 900px;
+  margin: auto;
+}
+
+.timeline h2 {
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 60px;
+}
+
+.timeline-item {
+  border-left: 3px solid #6f8f7b;
+  padding-left: 20px;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.timeline-year {
+  font-weight: bold;
+  color: #6f8f7b;
+}
+
+.timeline-item h3 {
+  margin: 5px 0;
+}
+
+.timeline-item p {
+  color: #666;
+  font-size: 14px;
+}
