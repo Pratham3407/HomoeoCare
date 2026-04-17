@@ -23,12 +23,14 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/reports", reportRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.get("/", (req, res) => {
-  res.send("HomeoCare API running...");
-});
 
-app.get("/home", (req, res) => {
-  res.send("This is home page");
+// Serve React frontend build (for production deployment)
+const clientBuildPath = path.join(__dirname, "../client/dist");
+app.use(express.static(clientBuildPath));
+
+// Handle React Router - send all non-API requests to index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(clientBuildPath, "index.html"));
 });
 
 const PORT = process.env.PORT || 5000;
