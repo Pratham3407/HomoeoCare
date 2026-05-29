@@ -153,34 +153,25 @@ Open browser at:
 # 👥 Team Collaboration Workflow
 
 1.  Pull latest code:
-
-```{=html}
-<!-- -->
 ```
-    git pull origin main
-
+git pull origin main
+```
 2.  Create new branch:
-
-```{=html}
-<!-- -->
 ```
-    git checkout -b feature-name
-
+git checkout -b feature-name
+```
 3.  Commit changes:
 
-```{=html}
-<!-- -->
-```
-    git add .
-    git commit -m "Describe your changes"
 
+```
+git add .
+git commit -m "Describe your changes"
+```
 4.  Push branch:
 
-```{=html}
-<!-- -->
 ```
-    git push origin feature-name
-
+git push origin feature-name
+```
 5.  Create Pull Request on GitHub.
 
 ------------------------------------------------------------------------
