@@ -189,15 +189,4 @@ Open browser at:
 
 -   Always run `npm install` after pulling changes
 
-------------------------------------------------------------------------
-
-# 📈 Project Status
-
-✔ Landing Page UI Completed\
-✔ Basic Backend Setup Completed\
-⬜ Authentication (Pending)\
-⬜ Appointment Booking (Pending)\
-⬜ Role-Based Access (Pending)\
-⬜ Deployment (Pending)
-
 #
