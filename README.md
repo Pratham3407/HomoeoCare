@@ -200,16 +200,4 @@ Open browser at:
 ⬜ Role-Based Access (Pending)\
 ⬜ Deployment (Pending)
 
-------------------------------------------------------------------------
-
-# 🎯 Future Improvements
-
--   JWT Authentication
--   Doctor & Patient Dashboards
--   Real-time Chat
--   Medicine Ordering System
--   Payment Integration
--   Deployment (Render + Vercel)
-
-------------------------------------------------------------------------
 #
