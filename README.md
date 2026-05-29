@@ -187,10 +187,7 @@ Open browser at:
 
 # 📌 Important Notes
 
--   Do NOT commit `.env`
--   Do NOT commit `node_modules`
 -   Always run `npm install` after pulling changes
--   Backend must run before testing API features
 
 ------------------------------------------------------------------------
 
