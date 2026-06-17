@@ -57,16 +57,14 @@ function Footer() {
       </div>
 
       <div className="footer-map-container">
-        <iframe
-          title="Google Map"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.012564170703!2d72.5318047!3d23.0592651!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e8499099ef87d%3A0x6d3c0e68e4af419d!2sSarvopari%20Mall!5e0!3m2!1sen!2sin!4v1711545600000!5m2!1sen!2sin"
-          width="100%"
-          height="300"
-          style={{ border: 0 }}
-          allowFullScreen=""
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        ></iframe>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d269.47247811106405!2d72.5378380832907!3d23.059005999869573!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2sin!4v1780045976794!5m2!1sen!2sin"
+          width="100%" 
+          height="300" 
+          style="{{ border:0 }}" 
+          allowfullscreen="" 
+          loading="lazy" 
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
       </div>
 
       <div className="footer-bottom">

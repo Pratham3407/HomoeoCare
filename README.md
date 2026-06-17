@@ -153,66 +153,31 @@ Open browser at:
 # 👥 Team Collaboration Workflow
 
 1.  Pull latest code:
-
-```{=html}
-<!-- -->
 ```
-    git pull origin main
-
+git pull origin main
+```
 2.  Create new branch:
-
-```{=html}
-<!-- -->
 ```
-    git checkout -b feature-name
-
+git checkout -b feature-name
+```
 3.  Commit changes:
 
-```{=html}
-<!-- -->
-```
-    git add .
-    git commit -m "Describe your changes"
 
+```
+git add .
+git commit -m "Describe your changes"
+```
 4.  Push branch:
 
-```{=html}
-<!-- -->
 ```
-    git push origin feature-name
-
+git push origin feature-name
+```
 5.  Create Pull Request on GitHub.
 
 ------------------------------------------------------------------------
 
 # 📌 Important Notes
 
--   Do NOT commit `.env`
--   Do NOT commit `node_modules`
 -   Always run `npm install` after pulling changes
--   Backend must run before testing API features
 
-------------------------------------------------------------------------
-
-# 📈 Project Status
-
-✔ Landing Page UI Completed\
-✔ Basic Backend Setup Completed\
-⬜ Authentication (Pending)\
-⬜ Appointment Booking (Pending)\
-⬜ Role-Based Access (Pending)\
-⬜ Deployment (Pending)
-
-------------------------------------------------------------------------
-
-# 🎯 Future Improvements
-
--   JWT Authentication
--   Doctor & Patient Dashboards
--   Real-time Chat
--   Medicine Ordering System
--   Payment Integration
--   Deployment (Render + Vercel)
-
-------------------------------------------------------------------------
 #
