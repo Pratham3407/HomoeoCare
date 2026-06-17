@@ -57,14 +57,13 @@ function Footer() {
       </div>
 
       <div className="footer-map-container">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d269.47247811106405!2d72.5378380832907!3d23.059005999869573!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2sin!4v1780045976794!5m2!1sen!2sin"
-          width="100%" 
-          height="300" 
-          style="{{ border:0 }}" 
-          allowfullscreen="" 
-          loading="lazy" 
-          referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14685.517048051843!2d72.53231360000001!3d23.046553199999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e8358ac1e25f9%3A0xa91e438b2f3f96f4!2sHomeopathic%20Clinic%20Dr%20Suketu%20shah!5e0!3m2!1sen!2sin!4v1781704998784!5m2!1sen!2sin"
+          width="100%"
+          height="300"
+          style={{ border: 0 }}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        ></iframe>
       </div>
 
       <div className="footer-bottom">
