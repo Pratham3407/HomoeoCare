@@ -65,6 +65,9 @@ function AppointmentForm() {
       <h3>Appointment Details</h3>
 
       <select 
+        id="consultationType"
+        name="consultationType"
+        aria-label="Consultation type"
         value={consultationType} 
         onChange={(e) => {
           setConsultationType(e.target.value);
@@ -102,6 +105,9 @@ function AppointmentForm() {
 
       <div className="form-row">
         <input
+          id="appointmentDate"
+          name="appointmentDate"
+          aria-label="Appointment date"
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
@@ -118,6 +124,9 @@ function AppointmentForm() {
       <h3>Health Information</h3>
 
       <textarea 
+        id="healthConcern"
+        name="reason"
+        aria-label="Describe your health concern"
         placeholder="Describe your health concern"
         value={reason}
         onChange={(e) => setReason(e.target.value)}

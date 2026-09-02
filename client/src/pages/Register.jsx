@@ -58,23 +58,29 @@ function Register() {
 
         {/* Attach handleSubmit here */}
         <form className="register-form" onSubmit={handleSubmit}>
-          <label>Full Name</label>
+          <label htmlFor="register-name">Full Name</label>
           <input
+            id="register-name"
+            name="name"
             type="text"
             autoFocus
             placeholder="Enter your full name"
             onChange={(e) => setName(e.target.value)}
           />
 
-          <label>Email</label>
+          <label htmlFor="register-email">Email</label>
           <input
+            id="register-email"
+            name="email"
             type="email"
             placeholder="Enter your email"
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          <label>Password</label>
+          <label htmlFor="register-password">Password</label>
           <input
+            id="register-password"
+            name="password"
             type="password"
             placeholder="Create password"
             onChange={(e) => setPassword(e.target.value)}

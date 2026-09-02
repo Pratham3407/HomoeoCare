@@ -240,35 +240,45 @@ function PatientProfile() {
               </div>
             ) : (
               <form className="edit-form" onSubmit={handleProfileUpdate}>
-                <label>Name</label>
+                <label htmlFor="profile-name">Name</label>
                 <input
+                  id="profile-name"
+                  name="name"
                   value={profileForm.name}
                   onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
                   required
                 />
-                <label>Email</label>
+                <label htmlFor="profile-email">Email</label>
                 <input
+                  id="profile-email"
+                  name="email"
                   type="email"
                   value={profileForm.email}
                   onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
                   required
                 />
-                <label>Current Password <span className="optional">(required to change password)</span></label>
+                <label htmlFor="profile-current-password">Current Password <span className="optional">(required to change password)</span></label>
                 <input
+                  id="profile-current-password"
+                  name="currentPassword"
                   type="password"
                   placeholder="Enter current password"
                   value={profileForm.currentPassword}
                   onChange={(e) => setProfileForm({ ...profileForm, currentPassword: e.target.value })}
                 />
-                <label>New Password <span className="optional">(leave blank to keep current)</span></label>
+                <label htmlFor="profile-new-password">New Password <span className="optional">(leave blank to keep current)</span></label>
                 <input
+                  id="profile-new-password"
+                  name="newPassword"
                   type="password"
                   placeholder="Enter new password"
                   value={profileForm.newPassword}
                   onChange={(e) => setProfileForm({ ...profileForm, newPassword: e.target.value })}
                 />
-                <label>Profile Photo</label>
+                <label htmlFor="profile-photo">Profile Photo</label>
                 <input
+                  id="profile-photo"
+                  name="profilePhoto"
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
@@ -383,15 +393,19 @@ function PatientProfile() {
 
             {showReportForm && (
               <form className="edit-form" onSubmit={handleReportSubmit} style={{ marginBottom: "20px", background: "#fdfbf7", padding: "20px", borderRadius: "8px", border: "1px solid #e2d8c3" }}>
-                <label>Report Name</label>
+                <label htmlFor="report-name">Report Name</label>
                 <input
+                  id="report-name"
+                  name="reportName"
                   value={reportForm.name}
                   onChange={e => setReportForm({ ...reportForm, name: e.target.value })}
                   placeholder="e.g. Blood Test Results, MRI Scan"
                   required
                 />
-                <label>File (Image or PDF, Max 25MB)</label>
+                <label htmlFor="report-file">File (Image or PDF, Max 25MB)</label>
                 <input
+                  id="report-file"
+                  name="reportFile"
                   type="file"
                   accept="image/*,.pdf"
                   onChange={e => setReportForm({ ...reportForm, file: e.target.files[0] })}

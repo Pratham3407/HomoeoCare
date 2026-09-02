@@ -10,7 +10,7 @@ function Stats() {
         </div>
 
         <div className="stat">
-          <h2>10000+</h2>
+          <h2>1,00,000+</h2>
           <p>Patients Treated</p>
         </div>
 

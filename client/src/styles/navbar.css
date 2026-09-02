@@ -2,19 +2,19 @@ html {
     scroll-behavior: smooth;
 }
 
+/* ========== NAVBAR BAR ========== */
 .navbar {
     background-color: #faf8f2;
     border-bottom: 1px solid #e9e4db;
     padding: 10px 0;
     position: sticky;
-    top: 0px;
+    top: 0;
     z-index: 999;
 }
 
 .nav-container {
     max-width: 1200px;
     margin: auto;
-
     height: 80px;
     display: flex;
     align-items: center;
@@ -22,29 +22,25 @@ html {
     padding: 0 20px;
 }
 
-.nav-links a {
-    text-decoration: none;
-    margin: 0 12px;
-    color: #333;
-    font-weight: 500;
-    cursor: pointer;
+.navbar * {
+    line-height: 1;
 }
 
-
-
-/* LOGO */
+/* ========== LOGO ========== */
 .logo {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .logo-circle {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .logo-circle img {
@@ -54,46 +50,50 @@ html {
 }
 
 .logo-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 34px;
+    font-size: 26px;
+    font-weight: 600;
     line-height: 1.1;
-    /* Important */
     margin: 0;
+    white-space: nowrap;
 }
 
 .logo-sub {
-    font-size: 17px;
+    font-size: 14px;
     line-height: 1;
-    /* Important */
-    margin-top: -4px;
-    /* Slight pull up */
+    margin-top: 2px;
     color: #8a8a8a;
 }
 
-/* LINKS */
-.nav-links {
+/* ========== DESKTOP NAV LINKS ========== */
+.nav-links-desktop {
     display: flex;
     gap: 24px;
     font-size: 16px;
     line-height: 1;
-    /* Important */
 }
 
-.nav-links a.active {
-    color: #6f8f7b;
+.nav-links-desktop a {
+    text-decoration: none;
+    color: #333;
     font-weight: 500;
-    font-size: 17px;
+    cursor: pointer;
+    transition: color 0.2s ease;
 }
 
-/* RIGHT SIDE */
-.nav-right {
+.nav-links-desktop a:hover {
+    color: #6f8f7b;
+}
+
+.nav-links-desktop a.active {
+    color: #6f8f7b;
+    font-weight: 600;
+}
+
+/* ========== DESKTOP NAV RIGHT ========== */
+.nav-right-desktop {
     display: flex;
     align-items: center;
-    gap: 14px;
-}
-
-.phone {
-    font-size: 15px;
+    gap: 12px;
 }
 
 .nav-btn {
@@ -101,37 +101,45 @@ html {
     color: white;
     border: none;
     border-radius: 6px;
-    padding: 8px 16px;
-    font-size: 15px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-family: inherit;
     cursor: pointer;
+    white-space: nowrap;
+    min-width: 100px;
+    text-align: center;
+    transition: opacity 0.2s ease;
 }
 
-.navbar * {
-    line-height: 1;
+.nav-btn:hover {
+    opacity: 0.9;
 }
 
-/* HAMBURGER MENU */
+/* ========== HAMBURGER (hidden on desktop) ========== */
 .hamburger {
     display: none;
     flex-direction: column;
     justify-content: space-between;
-    width: 30px;
-    height: 21px;
+    width: 28px;
+    height: 20px;
     cursor: pointer;
-    z-index: 1001;
+    z-index: 1100;
+    background: none;
+    border: none;
+    padding: 0;
 }
 
 .hamburger span {
     display: block;
-    height: 3px;
+    height: 2.5px;
     width: 100%;
     background-color: #333;
-    border-radius: 3px;
+    border-radius: 2px;
     transition: all 0.3s ease;
 }
 
 .hamburger.open span:nth-child(1) {
-    transform: translateY(9px) rotate(45deg);
+    transform: translateY(8.75px) rotate(45deg);
 }
 
 .hamburger.open span:nth-child(2) {
@@ -139,74 +147,240 @@ html {
 }
 
 .hamburger.open span:nth-child(3) {
-    transform: translateY(-9px) rotate(-45deg);
+    transform: translateY(-8.75px) rotate(-45deg);
 }
 
+/* ========== MOBILE ELEMENTS (hidden on desktop) ========== */
+.mobile-backdrop {
+    display: none;
+}
+
+.mobile-drawer {
+    display: none;
+}
+
+/* ========== MOBILE / TABLET BREAKPOINT ========== */
 @media (max-width: 992px) {
     .nav-container {
-        height: 70px;
+        height: 64px;
     }
 
     .logo-title {
-        font-size: 24px;
+        font-size: 20px;
     }
 
     .logo-sub {
-        font-size: 14px;
+        font-size: 11px;
     }
 
+    .logo-circle {
+        width: 44px;
+        height: 44px;
+    }
+
+    /* Hide desktop elements */
+    .nav-links-desktop,
+    .nav-right-desktop {
+        display: none !important;
+    }
+
+    /* Show hamburger */
     .hamburger {
         display: flex;
     }
 
-    .nav-links {
+    /* ---- Backdrop ---- */
+    .mobile-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0);
+        z-index: 1000;
+        pointer-events: none;
+        transition: background 0.3s ease;
+    }
+
+    .mobile-backdrop.active {
+        background: rgba(0, 0, 0, 0.4);
+        pointer-events: auto;
+    }
+
+    /* ---- Drawer ---- */
+    .mobile-drawer {
+        display: flex;
+        flex-direction: column;
         position: fixed;
         top: 0;
-        right: -100%;
-        height: 100vh;
-        width: 70%;
+        right: 0;
+        bottom: 0;
+        width: 82vw;
+        max-width: 360px;
+        height: 100dvh;
         background-color: #faf8f2;
-        flex-direction: column;
+        z-index: 1001;
+        box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+        transform: translateX(100%);
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .mobile-drawer.active {
+        transform: translateX(0);
+    }
+
+    /* ---- Drawer header ---- */
+    .drawer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e9e4db;
+        flex-shrink: 0;
+    }
+
+    .drawer-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .drawer-logo .logo-circle {
+        width: 40px;
+        height: 40px;
+    }
+
+    .drawer-logo .logo-title {
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    .drawer-logo .logo-sub {
+        font-size: 11px;
+        margin-top: 2px;
+    }
+
+    .drawer-close {
+        display: flex;
         align-items: center;
         justify-content: center;
-        gap: 30px;
-        transition: 0.3s ease;
-        box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-        z-index: 1000;
+        width: 44px;
+        height: 44px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        border-radius: 8px;
+        color: #555;
+        flex-shrink: 0;
+        margin-right: -8px;
+        transition: background-color 0.15s ease;
     }
 
-    .nav-links.active {
-        right: 0;
+    .drawer-close:hover {
+        background-color: rgba(0, 0, 0, 0.05);
     }
 
-    .nav-right {
-        display: none; /* Hide standard right side on mobile */
+    /* ---- Drawer nav links ---- */
+    .drawer-nav {
+        display: flex;
+        flex-direction: column;
+        padding: 12px 0;
+        flex: 1;
     }
 
-    .nav-links.active ~ .nav-right {
-        /* Optional: move nav-right items into nav-links for mobile */
+    .drawer-link {
+        display: block;
+        padding: 14px 24px;
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.15s ease, color 0.15s ease;
+        min-height: 48px;
+        line-height: 1.25;
+        display: flex;
+        align-items: center;
+    }
+
+    .drawer-link:hover {
+        background-color: rgba(111, 143, 123, 0.06);
+    }
+
+    .drawer-link.active {
+        color: #6f8f7b;
+        font-weight: 600;
+        background-color: rgba(111, 143, 123, 0.08);
+        border-right: 3px solid #6f8f7b;
+    }
+
+    /* ---- Drawer CTA buttons ---- */
+    .drawer-cta {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px 24px;
+        border-top: 1px solid #e9e4db;
+        flex-shrink: 0;
+        margin-top: auto;
+    }
+
+    .drawer-btn {
+        display: block;
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 15px;
+        font-weight: 600;
+        font-family: inherit;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: opacity 0.15s ease, transform 0.1s ease;
+        border: none;
+        box-sizing: border-box;
+    }
+
+    .drawer-btn:active {
+        transform: scale(0.98);
+    }
+
+    .drawer-btn-primary {
+        background-color: #6f8f7b;
+        color: white;
+    }
+
+    .drawer-btn-outline {
+        background: transparent;
+        color: #6f8f7b;
+        border: 1.5px solid #6f8f7b;
+    }
+
+    .drawer-btn-secondary {
+        background: transparent;
+        color: #555;
+        border: 1px solid #d4d0c8;
+    }
+
+    /* Hide hamburger X when drawer has its own close */
+    .hamburger.open span {
+        background-color: transparent;
     }
 }
 
-/* Mobile-specific adjustments to include nav-right items inside nav-links */
-@media (max-width: 992px) {
-    .nav-links {
-        padding-top: 80px;
-        justify-content: flex-start;
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+    .mobile-drawer {
+        transition: none;
     }
 
-    .nav-right.active {
-        display: flex;
-        position: fixed;
-        bottom: 50px;
-        right: calc(15% - 50px); /* Centers relative to the 70% width menu */
-        flex-direction: column;
-        z-index: 1001;
-        width: 40%;
-        gap: 15px;
+    .mobile-backdrop {
+        transition: none;
     }
-    
-    .nav-right.active .nav-btn {
-        width: 100%;
+
+    .hamburger span {
+        transition: none;
     }
 }

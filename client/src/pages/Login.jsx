@@ -83,8 +83,10 @@ function Login() {
             <p className="login-sub">Enter your email to receive a temporary password</p>
 
             <form className="login-form" onSubmit={handleForgotSubmit}>
-              <label>Registered Email</label>
+              <label htmlFor="forgot-email">Registered Email</label>
               <input
+                id="forgot-email"
+                name="email"
                 type="email"
                 placeholder="Enter your email"
                 value={forgotEmail}
@@ -105,16 +107,20 @@ function Login() {
             <p className="login-sub">Access your HomeoCare account</p>
 
             <form className="login-form" onSubmit={handleSubmit}>
-              <label>Email</label>
+              <label htmlFor="login-email">Email</label>
               <input
+                id="login-email"
+                name="email"
                 type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
 
-              <label>Password</label>
+              <label htmlFor="login-password">Password</label>
               <input
+                id="login-password"
+                name="password"
                 type="password"
                 placeholder="Enter your password"
                 value={password}

@@ -352,6 +352,9 @@ function DoctorDashboard() {
                 <div className="patients-container">
                   <div className="filter-bar" style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
                     <input
+                      id="patient-search"
+                      name="patientSearch"
+                      aria-label="Search patient by name or email"
                       type="text"
                       placeholder="Search patient by name or email..."
                       value={patientSearch}
@@ -455,6 +458,9 @@ function DoctorDashboard() {
                           <div style={{ marginTop: "15px", padding: "15px", background: "#fff", border: "1px solid #ddd", borderRadius: "6px" }}>
                             <h4 style={{ margin: "0 0 10px 0" }}>Add Feedback & Prescription</h4>
                             <textarea
+                              id={`report-feedback-${r._id}`}
+                              name="feedback"
+                              aria-label="Clinical feedback and prescription"
                               rows="4"
                               placeholder="Enter your clinical feedback, notes, or prescriptions based on this report..."
                               value={feedbackText}
@@ -503,8 +509,8 @@ function DoctorDashboard() {
         <div className="appointments-section">
           <div className="filter-bar" style={{ display: "flex", gap: "15px", marginBottom: "20px", flexWrap: "wrap", background: "#f9f9f9", padding: "15px", borderRadius: "8px", border: "1px solid #eee" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>Status</label>
-              <select value={apptStatusFilter} onChange={(e) => setApptStatusFilter(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", backgroundColor: "white", outline: "none", fontFamily: "inherit" }}>
+              <label htmlFor="appt-status-filter" style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>Status</label>
+              <select id="appt-status-filter" name="apptStatusFilter" value={apptStatusFilter} onChange={(e) => setApptStatusFilter(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", backgroundColor: "white", outline: "none", fontFamily: "inherit" }}>
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
@@ -515,8 +521,8 @@ function DoctorDashboard() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>Consultation Type</label>
-              <select value={apptTypeFilter} onChange={(e) => setApptTypeFilter(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", backgroundColor: "white", outline: "none", fontFamily: "inherit" }}>
+              <label htmlFor="appt-type-filter" style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>Consultation Type</label>
+              <select id="appt-type-filter" name="apptTypeFilter" value={apptTypeFilter} onChange={(e) => setApptTypeFilter(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", backgroundColor: "white", outline: "none", fontFamily: "inherit" }}>
                 <option value="all">All Types</option>
                 <option value="online">Online</option>
                 <option value="offline">In-Person</option>
@@ -524,8 +530,8 @@ function DoctorDashboard() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>Date Range</label>
-              <select value={apptDateFilter} onChange={(e) => setApptDateFilter(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", backgroundColor: "white", outline: "none", fontFamily: "inherit" }}>
+              <label htmlFor="appt-date-filter" style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>Date Range</label>
+              <select id="appt-date-filter" name="apptDateFilter" value={apptDateFilter} onChange={(e) => setApptDateFilter(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", backgroundColor: "white", outline: "none", fontFamily: "inherit" }}>
                 <option value="all">Any Date</option>
                 <option value="today">Today</option>
                 <option value="yesterday">Yesterday</option>
@@ -538,12 +544,12 @@ function DoctorDashboard() {
             {apptDateFilter === "custom" && (
               <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                  <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>From</label>
-                  <input type="date" value={apptCustomStart} onChange={(e) => setApptCustomStart(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", fontFamily: "inherit" }} />
+                  <label htmlFor="appt-custom-start" style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>From</label>
+                  <input id="appt-custom-start" name="apptCustomStart" type="date" value={apptCustomStart} onChange={(e) => setApptCustomStart(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", fontFamily: "inherit" }} />
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                  <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>To</label>
-                  <input type="date" value={apptCustomEnd} onChange={(e) => setApptCustomEnd(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", fontFamily: "inherit" }} />
+                  <label htmlFor="appt-custom-end" style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>To</label>
+                  <input id="appt-custom-end" name="apptCustomEnd" type="date" value={apptCustomEnd} onChange={(e) => setApptCustomEnd(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", fontFamily: "inherit" }} />
                 </div>
               </div>
             )}
@@ -622,20 +628,26 @@ function DoctorDashboard() {
                 {showPostpone === a._id && (
                   <div className="postpone-modal">
                     <h4>Reschedule Appointment</h4>
-                    <label>New Date</label>
+                    <label htmlFor={`postpone-date-${a._id}`}>New Date</label>
                     <input
+                      id={`postpone-date-${a._id}`}
+                      name="postponeDate"
                       type="date"
                       value={postponeData.date}
                       onChange={(e) => setPostponeData({ ...postponeData, date: e.target.value })}
                     />
-                    <label>New Time</label>
+                    <label htmlFor={`postpone-time-${a._id}`}>New Time</label>
                     <input
+                      id={`postpone-time-${a._id}`}
+                      name="postponeTime"
                       type="time"
                       value={postponeData.time}
                       onChange={(e) => setPostponeData({ ...postponeData, time: e.target.value })}
                     />
-                    <label>Reason</label>
+                    <label htmlFor={`postpone-reason-${a._id}`}>Reason</label>
                     <input
+                      id={`postpone-reason-${a._id}`}
+                      name="postponeReason"
                       type="text"
                       placeholder="Reason for rescheduling"
                       value={postponeData.reason}
@@ -652,8 +664,10 @@ function DoctorDashboard() {
                 {showPrescription === a._id && (
                   <div className="postpone-modal">
                     <h4>{a.prescription ? "Edit Prescription" : "Write Prescription"}</h4>
-                    <label>Medical Notes & Prescription</label>
+                    <label htmlFor={`prescription-${a._id}`}>Medical Notes & Prescription</label>
                     <textarea
+                      id={`prescription-${a._id}`}
+                      name="prescription"
                       rows="5"
                       placeholder="Enter discussion notes, diagnosis, and prescribed medicines..."
                       value={prescriptionData}
@@ -677,8 +691,8 @@ function DoctorDashboard() {
         <div className="orders-section">
           <div className="filter-bar" style={{ display: "flex", gap: "15px", marginBottom: "20px", background: "#f9f9f9", padding: "15px", borderRadius: "8px", border: "1px solid #eee" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>Order Status</label>
-              <select value={orderStatusFilter} onChange={(e) => setOrderStatusFilter(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", backgroundColor: "white", outline: "none", fontFamily: "inherit" }}>
+              <label htmlFor="order-status-filter" style={{ fontSize: "0.85rem", fontWeight: "600", color: "#555" }}>Order Status</label>
+              <select id="order-status-filter" name="orderStatusFilter" value={orderStatusFilter} onChange={(e) => setOrderStatusFilter(e.target.value)} style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc", backgroundColor: "white", outline: "none", fontFamily: "inherit" }}>
                 <option value="all">All Orders</option>
                 <option value="placed">Placed</option>
                 <option value="reviewed">Reviewed</option>
@@ -755,6 +769,9 @@ function DoctorDashboard() {
         <div className="medicines-section">
           <div className="filter-bar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", background: "#f9f9f9", padding: "15px", borderRadius: "8px", border: "1px solid #eee", flexWrap: "wrap", gap: "15px" }}>
             <input
+              id="med-search"
+              name="medSearch"
+              aria-label="Search medicines by name or description"
               type="text"
               placeholder="Search medicines by name or description..."
               value={medSearch}
@@ -769,17 +786,26 @@ function DoctorDashboard() {
           {showMedForm && (
             <form className="med-form" onSubmit={handleMedSubmit}>
               <input
+                id="med-name"
+                name="medName"
+                aria-label="Medicine name"
                 placeholder="Medicine name"
                 value={medForm.name}
                 onChange={(e) => setMedForm({ ...medForm, name: e.target.value })}
                 required
               />
               <input
+                id="med-description"
+                name="medDescription"
+                aria-label="Medicine description"
                 placeholder="Description"
                 value={medForm.description}
                 onChange={(e) => setMedForm({ ...medForm, description: e.target.value })}
               />
               <input
+                id="med-price"
+                name="medPrice"
+                aria-label="Medicine price"
                 type="number"
                 placeholder="Price (₹)"
                 value={medForm.price}
@@ -787,6 +813,9 @@ function DoctorDashboard() {
                 required
               />
               <input
+                id="med-stock"
+                name="medStock"
+                aria-label="Stock quantity"
                 type="number"
                 placeholder="Stock quantity"
                 value={medForm.stock}

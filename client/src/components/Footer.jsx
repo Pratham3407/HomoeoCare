@@ -28,9 +28,9 @@ function Footer() {
           <h4>Quick Links</h4>
           <ul>
             <Link to="/about"><li>About the Doctor</li></Link>
-            <Link to="/services"><li>Our Services</li></Link>
-            <Link to="/patients"><li>Patient Stories</li></Link>
-            <Link to="/contact"><li>Book Appointment</li></Link>
+            <Link to="/#services"><li>Our Services</li></Link>
+            <Link to="/#testimonials"><li>Patient Stories</li></Link>
+            <Link to="/appointment"><li>Book Appointment</li></Link>
           </ul>
         </div>
 
@@ -41,7 +41,7 @@ function Footer() {
             <li>115, Sarvopari Mall, Opposite Utsav Elegance,
               Bhuyangdev Cross Road, Sola Road, Ahemdabad, Gujarat - 380061</li>
             <li>+91 9824011536</li>
-            <li><a href="mailto:[dr.suketu.shah78@gmail.com]">dr.suketu.shah78@gmail.com</a></li>
+            <li><a href="mailto:dr.suketu.shah78@gmail.com">dr.suketu.shah78@gmail.com</a></li>
           </ul>
         </div>
 

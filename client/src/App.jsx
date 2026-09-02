@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 
@@ -15,6 +16,21 @@ import PatientProfile from "./pages/PatientProfile";
 
 function App() {
   const location = useLocation();
+
+  // Scroll to hash section after navigation
+  useEffect(() => {
+    if (location.hash) {
+      // Small delay to let the page render before scrolling
+      setTimeout(() => {
+        const element = document.getElementById(location.hash.substring(1));
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 300);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location]);
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />

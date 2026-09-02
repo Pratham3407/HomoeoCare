@@ -1,5 +1,5 @@
 import "../styles/navbar.css";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import { Link as ScrollLink } from "react-scroll";
 import logo from "../assets/logo.png";
@@ -13,10 +13,22 @@ function Navbar() {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
+  // Prevent body scroll when drawer is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
+
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <div className="logo">
+        <Link to="/" className="logo" style={{ textDecoration: "none", color: "inherit" }}>
           <div className="logo-circle">
             <img src={logo} alt="logo" />
           </div>
@@ -25,7 +37,7 @@ function Navbar() {
             <br />
             <div className="logo-sub">Homoeopathic Consultant</div>
           </div>
-        </div>
+        </Link>
 
         {/* Hamburger Menu Icon */}
         <div className={`hamburger ${isMenuOpen ? "open" : ""}`} onClick={toggleMenu}>
@@ -34,96 +46,170 @@ function Navbar() {
           <span></span>
         </div>
 
-        <div className={`nav-links ${isMenuOpen ? "active" : ""}`}>
-          <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")} onClick={closeMenu}>
+        {/* Desktop nav links */}
+        <div className="nav-links-desktop">
+          <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>
             Home
           </NavLink>
 
-          <NavLink to="/about" className={({ isActive }) => (isActive ? "active" : "")} onClick={closeMenu}>
+          <NavLink to="/about" className={({ isActive }) => (isActive ? "active" : "")}>
             About
           </NavLink>
 
-          {/* SERVICES */}
           {location.pathname === "/" ? (
-            <ScrollLink
-              to="services"
-              smooth={true}
-              duration={500}
-              spy={true}
-              activeClass="active"
-              onClick={closeMenu}
-            >
+            <ScrollLink to="services" smooth={true} duration={500} spy={true} activeClass="active">
               Services
             </ScrollLink>
           ) : (
-            <Link to="/#services" onClick={closeMenu}>Services</Link>
+            <Link to="/#services">Services</Link>
           )}
 
-          {/* TESTIMONIALS */}
           {location.pathname === "/" ? (
-            <ScrollLink
-              to="testimonials"
-              smooth={true}
-              duration={500}
-              spy={true}
-              activeClass="active"
-              onClick={closeMenu}
-            >
+            <ScrollLink to="testimonials" smooth={true} duration={500} spy={true} activeClass="active">
               Testimonials
             </ScrollLink>
           ) : (
-            <Link to="/#testimonials" onClick={closeMenu}>Testimonials</Link>
+            <Link to="/#testimonials">Testimonials</Link>
           )}
 
-          {/* CONTACT */}
           {location.pathname === "/" ? (
-            <ScrollLink
-              to="contact"
-              smooth={true}
-              duration={500}
-              spy={true}
-              activeClass="active"
-              onClick={closeMenu}
-            >
+            <ScrollLink to="contact" smooth={true} duration={500} spy={true} activeClass="active">
               Contact
             </ScrollLink>
           ) : (
-            <Link to="/#contact" onClick={closeMenu}>Contact</Link>
+            <Link to="/#contact">Contact</Link>
           )}
         </div>
 
-        <div className={`nav-right ${isMenuOpen ? "active" : ""}`}>
-          <a href="tel:+919824011536" style={{ textDecoration: "none" }} onClick={closeMenu}>
+        {/* Desktop nav right */}
+        <div className="nav-right-desktop">
+          <a href="tel:+919824011536" style={{ textDecoration: "none" }}>
             <button className="nav-btn" style={{ background: "transparent", border: "1px solid #6f8f7b", color: "#6f8f7b" }}>
-              📞 Call Now
+              Call Now
             </button>
           </a>
 
           {user ? (
             <>
               {user.role === "doctor" ? (
-                <Link to="/doctor/dashboard" onClick={closeMenu}>
+                <Link to="/doctor/dashboard">
                   <button className="nav-btn">Dashboard</button>
                 </Link>
               ) : (
-                <Link to="/profile" onClick={closeMenu}>
+                <Link to="/profile">
                   <button className="nav-btn">My Profile</button>
                 </Link>
               )}
-              <button className="nav-btn" onClick={() => { logout(); closeMenu(); }}>
+              <button className="nav-btn" onClick={logout}>
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/appointment" onClick={closeMenu}>
+              <Link to="/appointment">
                 <button className="nav-btn">Book Appointment</button>
               </Link>
-              <Link to="/login" onClick={closeMenu}>
+              <Link to="/login">
                 <button className="nav-btn">Login</button>
               </Link>
             </>
           )}
+        </div>
+
+        {/* Mobile backdrop */}
+        <div
+          className={`mobile-backdrop ${isMenuOpen ? "active" : ""}`}
+          onClick={closeMenu}
+        />
+
+        {/* Mobile drawer */}
+        <div className={`mobile-drawer ${isMenuOpen ? "active" : ""}`}>
+          {/* Drawer header */}
+          <div className="drawer-header">
+            <Link to="/" className="drawer-logo" style={{ textDecoration: "none", color: "inherit" }} onClick={closeMenu}>
+              <div className="logo-circle">
+                <img src={logo} alt="logo" />
+              </div>
+              <div>
+                <div className="logo-title">Dr. Suketu Shah</div>
+                <div className="logo-sub">Homoeopathic Consultant</div>
+              </div>
+            </Link>
+            <button className="drawer-close" onClick={closeMenu} aria-label="Close menu">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          {/* Drawer nav links */}
+          <div className="drawer-nav">
+            <NavLink to="/" end className={({ isActive }) => `drawer-link ${isActive ? "active" : ""}`} onClick={closeMenu}>
+              Home
+            </NavLink>
+
+            <NavLink to="/about" className={({ isActive }) => `drawer-link ${isActive ? "active" : ""}`} onClick={closeMenu}>
+              About
+            </NavLink>
+
+            {location.pathname === "/" ? (
+              <ScrollLink to="services" smooth={true} duration={500} spy={true} activeClass="active" className="drawer-link" onClick={closeMenu}>
+                Services
+              </ScrollLink>
+            ) : (
+              <Link to="/#services" className="drawer-link" onClick={closeMenu}>Services</Link>
+            )}
+
+            {location.pathname === "/" ? (
+              <ScrollLink to="testimonials" smooth={true} duration={500} spy={true} activeClass="active" className="drawer-link" onClick={closeMenu}>
+                Testimonials
+              </ScrollLink>
+            ) : (
+              <Link to="/#testimonials" className="drawer-link" onClick={closeMenu}>Testimonials</Link>
+            )}
+
+            {location.pathname === "/" ? (
+              <ScrollLink to="contact" smooth={true} duration={500} spy={true} activeClass="active" className="drawer-link" onClick={closeMenu}>
+                Contact
+              </ScrollLink>
+            ) : (
+              <Link to="/#contact" className="drawer-link" onClick={closeMenu}>Contact</Link>
+            )}
+          </div>
+
+          {/* Drawer CTA buttons */}
+          <div className="drawer-cta">
+            <a href="tel:+919824011536" className="drawer-btn drawer-btn-outline" onClick={closeMenu}>
+              Call Now
+            </a>
+
+            {user ? (
+              <>
+                {user.role === "doctor" ? (
+                  <Link to="/doctor/dashboard" className="drawer-btn drawer-btn-primary" onClick={closeMenu}>
+                    Dashboard
+                  </Link>
+                ) : (
+                  <Link to="/profile" className="drawer-btn drawer-btn-primary" onClick={closeMenu}>
+                    My Profile
+                  </Link>
+                )}
+                <button className="drawer-btn drawer-btn-secondary" onClick={() => { logout(); closeMenu(); }}>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/appointment" className="drawer-btn drawer-btn-primary" onClick={closeMenu}>
+                  Book Appointment
+                </Link>
+                <Link to="/login" className="drawer-btn drawer-btn-secondary" onClick={closeMenu}>
+                  Login
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </nav>

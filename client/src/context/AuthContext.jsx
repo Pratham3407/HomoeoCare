@@ -118,6 +118,9 @@ export const AuthProvider = ({ children }) => {
             </p>
             <form onSubmit={handleReloginSubmit}>
               <input
+                id="relogin-password"
+                name="password"
+                aria-label="Re-enter your password"
                 type="password"
                 placeholder="Enter password"
                 value={reloginPassword}

@@ -162,24 +162,36 @@ function OrderMedicine() {
             <h3>Shipping Address</h3>
             <form onSubmit={handlePlaceOrder}>
               <input
+                id="shipping-street"
+                name="street"
+                aria-label="Street or house number"
                 placeholder="Street / House No."
                 value={address.street}
                 onChange={(e) => setAddress({ ...address, street: e.target.value })}
                 required
               />
               <input
+                id="shipping-city"
+                name="city"
+                aria-label="City"
                 placeholder="City"
                 value={address.city}
                 onChange={(e) => setAddress({ ...address, city: e.target.value })}
                 required
               />
               <input
+                id="shipping-state"
+                name="state"
+                aria-label="State"
                 placeholder="State"
                 value={address.state}
                 onChange={(e) => setAddress({ ...address, state: e.target.value })}
                 required
               />
               <input
+                id="shipping-pincode"
+                name="pincode"
+                aria-label="Pincode"
                 placeholder="Pincode"
                 value={address.pincode}
                 onChange={(e) => setAddress({ ...address, pincode: e.target.value })}
