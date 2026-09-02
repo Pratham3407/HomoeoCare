@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import "../styles/dashboard.css";
+import "../styles/error-states.css";
 import { apiFetch } from "../utils/api";
 import { SERVER_URL } from "../config";
+import { validate } from "../utils/errors";
 
 function DoctorDashboard() {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ function DoctorDashboard() {
   const [patientReports, setPatientReports] = useState([]);
   const [reviewingReportId, setReviewingReportId] = useState(null);
   const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackError, setFeedbackError] = useState("");
 
   // Appointments
   const [appointments, setAppointments] = useState([]);
@@ -29,11 +32,14 @@ function DoctorDashboard() {
   const [medicines, setMedicines] = useState([]);
   const [showMedForm, setShowMedForm] = useState(false);
   const [medForm, setMedForm] = useState({ name: "", description: "", price: "", stock: "" });
+  const [medErrors, setMedErrors] = useState({});
+  const [medSubmitting, setMedSubmitting] = useState(false);
   const [editingMedId, setEditingMedId] = useState(null);
 
   // Postpone modal
   const [showPostpone, setShowPostpone] = useState(null);
   const [postponeData, setPostponeData] = useState({ date: "", time: "", reason: "" });
+  const [postponeErrors, setPostponeErrors] = useState({});
 
   // Prescription modal
   const [showPrescription, setShowPrescription] = useState(null);
@@ -53,12 +59,11 @@ function DoctorDashboard() {
   useEffect(() => {
     if (selectedPatient) {
       apiFetch(`/reports/patient/${selectedPatient._id}`, {}, logout)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) setPatientReports(data);
+        .then(res => {
+          if (res.ok && Array.isArray(res.data)) setPatientReports(res.data);
           else setPatientReports([]);
         })
-        .catch(err => console.error("Error fetching patient reports:", err));
+        .catch(() => setPatientReports([]));
     } else {
       setPatientReports([]);
     }
@@ -123,7 +128,7 @@ function DoctorDashboard() {
 
   useEffect(() => {
     if (!user || user.role !== "doctor") {
-      alert("Access denied. Doctor login required.");
+      toast.error("You don't have permission to access this area. Doctor login required.");
       navigate("/login");
     }
   }, [navigate, user]);
@@ -137,49 +142,66 @@ function DoctorDashboard() {
 
   const fetchAppointments = async () => {
     const res = await apiFetch("/appointments", {}, logout);
-    const data = await res.json();
-    setAppointments(data);
+    if (res.ok) setAppointments(res.data);
+    else if (res.message) toast.error(res.message);
   };
 
   const fetchOrders = async () => {
     const res = await apiFetch("/orders", {}, logout);
-    const data = await res.json();
-    setOrders(data);
+    if (res.ok) setOrders(res.data);
+    else if (res.message) toast.error(res.message);
   };
 
   const fetchMedicines = async () => {
     const res = await apiFetch("/medicines", {}, logout);
-    const data = await res.json();
-    setMedicines(data);
+    if (res.ok) setMedicines(res.data);
+    else if (res.message) toast.error(res.message);
   };
 
   const fetchPatients = async () => {
     const res = await apiFetch("/users/patients", {}, logout);
-    const data = await res.json();
-    setPatientsList(Array.isArray(data) ? data : []);
+    if (res.ok) setPatientsList(Array.isArray(res.data) ? res.data : []);
+    else if (res.message) toast.error(res.message);
   };
 
   // Appointment Actions
   const updateAppointment = async (id, body) => {
-    await apiFetch(`/appointments/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }, logout);
-    fetchAppointments();
-    toast.success("Appointment updated");
+    try {
+      const res = await apiFetch(`/appointments/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }, logout);
+      if (res.ok) {
+        fetchAppointments();
+        toast.success("Appointment updated.");
+      } else {
+        toast.error(res.message);
+      }
+    } catch {
+      toast.error("We couldn't update the appointment right now. Please try again.");
+    }
   };
 
   const handlePostpone = (id) => {
     setShowPostpone(id);
     setPostponeData({ date: "", time: "", reason: "" });
+    setPostponeErrors({});
   };
 
   const submitPostpone = async () => {
-    if (!postponeData.date || !postponeData.time) {
-      toast.error("Please enter new date and time");
+    const fieldErrors = {};
+    const dateError = validate.date(postponeData.date);
+    const timeError = validate.time(postponeData.time);
+    if (dateError) fieldErrors.date = dateError;
+    if (timeError) fieldErrors.time = timeError;
+
+    if (Object.keys(fieldErrors).length > 0) {
+      setPostponeErrors(fieldErrors);
       return;
     }
+
+    setPostponeErrors({});
     await updateAppointment(showPostpone, {
       status: "postponed",
       date: postponeData.date,
@@ -195,67 +217,119 @@ function DoctorDashboard() {
   };
 
   const submitPrescription = async () => {
+    if (!prescriptionData.trim()) {
+      toast.error("Please enter the prescription.");
+      return;
+    }
     await updateAppointment(showPrescription, {
       prescription: prescriptionData,
     });
     setShowPrescription(null);
-    toast.success("Prescription saved");
   };
 
   // Order Actions
   const updateOrder = async (id, body) => {
-    await apiFetch(`/orders/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }, logout);
-    fetchOrders();
-    toast.success("Order updated");
+    try {
+      const res = await apiFetch(`/orders/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }, logout);
+      if (res.ok) {
+        fetchOrders();
+        toast.success("Order updated.");
+      } else {
+        toast.error(res.message);
+      }
+    } catch {
+      toast.error("We couldn't update the order right now. Please try again.");
+    }
   };
 
   // Medicine Actions
   const handleMedSubmit = async (e) => {
     e.preventDefault();
-    const payload = {
-      name: medForm.name,
-      description: medForm.description,
-      price: Number(medForm.price),
-      stock: Number(medForm.stock),
-    };
 
-    if (editingMedId) {
-      await apiFetch(`/medicines/${editingMedId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }, logout);
-      toast.success("Medicine updated");
-    } else {
-      await apiFetch(`/medicines`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }, logout);
-      toast.success("Medicine added");
+    // Client-side validation
+    const fieldErrors = {};
+    const nameError = validate.required(medForm.name, "medicine name");
+    if (nameError) fieldErrors.name = nameError;
+    const priceError = validate.price(medForm.price);
+    if (priceError) fieldErrors.price = priceError;
+    const stockError = validate.stock(medForm.stock);
+    if (stockError) fieldErrors.stock = stockError;
+
+    if (Object.keys(fieldErrors).length > 0) {
+      setMedErrors(fieldErrors);
+      return;
     }
 
-    setMedForm({ name: "", description: "", price: "", stock: "" });
-    setEditingMedId(null);
-    setShowMedForm(false);
-    fetchMedicines();
+    setMedErrors({});
+    setMedSubmitting(true);
+
+    const payload = {
+      name: medForm.name.trim(),
+      description: medForm.description,
+      price: Number(medForm.price),
+      stock: Number(medForm.stock || 0),
+    };
+
+    try {
+      let result;
+      if (editingMedId) {
+        result = await apiFetch(`/medicines/${editingMedId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }, logout);
+      } else {
+        result = await apiFetch(`/medicines`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }, logout);
+      }
+
+      if (result.ok) {
+        toast.success(editingMedId ? "Medicine updated successfully." : "Medicine added successfully.");
+        setMedForm({ name: "", description: "", price: "", stock: "" });
+        setEditingMedId(null);
+        setShowMedForm(false);
+        fetchMedicines();
+      } else {
+        if (result.fieldErrors && Object.keys(result.fieldErrors).length > 0) {
+          setMedErrors(result.fieldErrors);
+        } else {
+          toast.error(result.message);
+        }
+      }
+    } catch {
+      toast.error("We couldn't save the medicine right now. Please try again.");
+    } finally {
+      setMedSubmitting(false);
+    }
   };
 
   const deleteMedicine = async (id) => {
     if (!window.confirm("Delete this medicine?")) return;
-    await apiFetch(`/medicines/${id}`, { method: "DELETE" }, logout);
-    toast.success("Medicine deleted");
-    fetchMedicines();
+    try {
+      const res = await apiFetch(`/medicines/${id}`, { method: "DELETE" }, logout);
+      if (res.ok) {
+        toast.success("Medicine deleted successfully.");
+        fetchMedicines();
+      } else {
+        toast.error(res.message);
+      }
+    } catch {
+      toast.error("We couldn't delete the medicine right now. Please try again.");
+    }
   };
 
   const editMedicine = (med) => {
     setMedForm({ name: med.name, description: med.description, price: med.price, stock: med.stock });
     setEditingMedId(med._id);
     setShowMedForm(true);
+    setMedErrors({});
   };
 
   const handleSendMeetLink = async (appointmentId) => {
@@ -263,43 +337,54 @@ function DoctorDashboard() {
     if (!meetLink) return;
 
     try {
-      const res = await apiFetch(`/appointments/${appointmentId}/send-meet-link`, {
+      const result = await apiFetch(`/appointments/${appointmentId}/send-meet-link`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ meetLink }),
       }, logout);
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("Meet link saved and emailed to patient!");
-        fetchAppointments(); // Refresh to show the latest link
+
+      if (result.ok) {
+        toast.success("Meeting link saved and emailed to patient.");
+        fetchAppointments();
       } else {
-        toast.error(data.message || "Failed to send link");
+        toast.error(result.message);
       }
     } catch {
-      toast.error("Error sending meet link");
+      toast.error("We couldn't send the meeting link right now. Please try again.");
     }
   };
 
   const handleReportReview = async () => {
+    if (!feedbackText.trim()) {
+      setFeedbackError("Please enter your feedback.");
+      return;
+    }
+    setFeedbackError("");
+
     try {
-      const res = await apiFetch(`/reports/${reviewingReportId}/review`, {
+      const result = await apiFetch(`/reports/${reviewingReportId}/review`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ doctorFeedback: feedbackText }),
       }, logout);
-      if (res.ok) {
-        toast.success("Feedback added successfully & email sent");
+
+      if (result.ok) {
+        toast.success("Feedback added successfully & email sent.");
         setReviewingReportId(null);
         setFeedbackText("");
-        // Refresh patient reports
-        const updatedReports = await apiFetch(`/reports/patient/${selectedPatient._id}`, {}, logout).then(r => r.json());
-        setPatientReports(Array.isArray(updatedReports) ? updatedReports : []);
+        const updatedReports = await apiFetch(`/reports/patient/${selectedPatient._id}`, {}, logout);
+        setPatientReports(updatedReports.ok && Array.isArray(updatedReports.data) ? updatedReports.data : []);
       } else {
-        const data = await res.json();
-        toast.error(data.message || "Failed to add feedback");
+        toast.error(result.message);
       }
     } catch {
-      toast.error("Error adding feedback");
+      toast.error("We couldn't add the feedback right now. Please try again.");
+    }
+  };
+
+  const clearMedError = (field) => {
+    if (medErrors[field]) {
+      setMedErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -448,11 +533,11 @@ function DoctorDashboard() {
                           </div>
                         )}
                         <div className="card-actions" style={{ marginTop: "15px" }}>
-                          <button style={{ background: r.status === "reviewed" ? "#f39c12" : "#27ae60" }} onClick={() => { setReviewingReportId(r._id); setFeedbackText(r.doctorFeedback || ""); }}>
+                          <button style={{ background: r.status === "reviewed" ? "#f39c12" : "#27ae60" }} onClick={() => { setReviewingReportId(r._id); setFeedbackText(r.doctorFeedback || ""); setFeedbackError(""); }}>
                             {r.status === "reviewed" ? "Edit Feedback" : "Provide Feedback"}
                           </button>
                         </div>
-                        
+
                         {/* Inline Review Modal */}
                         {reviewingReportId === r._id && (
                           <div style={{ marginTop: "15px", padding: "15px", background: "#fff", border: "1px solid #ddd", borderRadius: "6px" }}>
@@ -461,12 +546,22 @@ function DoctorDashboard() {
                               id={`report-feedback-${r._id}`}
                               name="feedback"
                               aria-label="Clinical feedback and prescription"
+                              aria-invalid={feedbackError ? "true" : "false"}
+                              aria-describedby={feedbackError ? "report-feedback-error" : undefined}
                               rows="4"
                               placeholder="Enter your clinical feedback, notes, or prescriptions based on this report..."
                               value={feedbackText}
-                              onChange={(e) => setFeedbackText(e.target.value)}
-                              style={{ width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #ccc", fontFamily: "inherit", marginBottom: "10px" }}
+                              onChange={(e) => {
+                                setFeedbackText(e.target.value);
+                                if (feedbackError) setFeedbackError("");
+                              }}
+                              style={{ width: "100%", padding: "10px", borderRadius: "4px", border: feedbackError ? "1px solid #c0392b" : "1px solid #ccc", fontFamily: "inherit", marginBottom: "10px" }}
                             />
+                            {feedbackError && (
+                              <p id="report-feedback-error" className="field-error" role="alert" style={{ marginTop: "-5px" }}>
+                                {feedbackError}
+                              </p>
+                            )}
                             <div style={{ display: "flex", gap: "10px" }}>
                               <button onClick={handleReportReview}>Save & Notify Patient</button>
                               <button className="btn-cancel" onClick={() => setReviewingReportId(null)}>Cancel</button>
@@ -633,17 +728,35 @@ function DoctorDashboard() {
                       id={`postpone-date-${a._id}`}
                       name="postponeDate"
                       type="date"
+                      aria-invalid={postponeErrors.date ? "true" : "false"}
+                      aria-describedby={postponeErrors.date ? `postpone-date-error-${a._id}` : undefined}
+                      className={postponeErrors.date ? "input-error" : ""}
                       value={postponeData.date}
-                      onChange={(e) => setPostponeData({ ...postponeData, date: e.target.value })}
+                      onChange={(e) => {
+                        setPostponeData({ ...postponeData, date: e.target.value });
+                        if (postponeErrors.date) setPostponeErrors((prev) => ({ ...prev, date: undefined }));
+                      }}
                     />
+                    {postponeErrors.date && (
+                      <p id={`postpone-date-error-${a._id}`} className="field-error" role="alert">{postponeErrors.date}</p>
+                    )}
                     <label htmlFor={`postpone-time-${a._id}`}>New Time</label>
                     <input
                       id={`postpone-time-${a._id}`}
                       name="postponeTime"
                       type="time"
+                      aria-invalid={postponeErrors.time ? "true" : "false"}
+                      aria-describedby={postponeErrors.time ? `postpone-time-error-${a._id}` : undefined}
+                      className={postponeErrors.time ? "input-error" : ""}
                       value={postponeData.time}
-                      onChange={(e) => setPostponeData({ ...postponeData, time: e.target.value })}
+                      onChange={(e) => {
+                        setPostponeData({ ...postponeData, time: e.target.value });
+                        if (postponeErrors.time) setPostponeErrors((prev) => ({ ...prev, time: undefined }));
+                      }}
                     />
+                    {postponeErrors.time && (
+                      <p id={`postpone-time-error-${a._id}`} className="field-error" role="alert">{postponeErrors.time}</p>
+                    )}
                     <label htmlFor={`postpone-reason-${a._id}`}>Reason</label>
                     <input
                       id={`postpone-reason-${a._id}`}
@@ -655,7 +768,7 @@ function DoctorDashboard() {
                     />
                     <div className="modal-actions">
                       <button onClick={submitPostpone}>Confirm</button>
-                      <button className="btn-cancel" onClick={() => setShowPostpone(null)}>Cancel</button>
+                      <button className="btn-cancel" onClick={() => { setShowPostpone(null); setPostponeErrors({}); }}>Cancel</button>
                     </div>
                   </div>
                 )}
@@ -742,7 +855,7 @@ function DoctorDashboard() {
                 )}
                 {order.orderStatus === "reviewed" && (
                   <button onClick={() => {
-                    const tid = prompt("Enter IndiaPost Tracking ID:");
+                    const tid = window.prompt("Enter IndiaPost Tracking ID:");
                     if (tid) updateOrder(order._id, { orderStatus: "shipped", trackingId: tid });
                   }}>
                     Ship Order
@@ -778,22 +891,30 @@ function DoctorDashboard() {
               onChange={(e) => setMedSearch(e.target.value)}
               style={{ padding: "10px", width: "100%", maxWidth: "400px", borderRadius: "4px", border: "1px solid #ccc", fontFamily: "inherit" }}
             />
-            <button className="add-med-btn" onClick={() => { setShowMedForm(!showMedForm); setEditingMedId(null); setMedForm({ name: "", description: "", price: "", stock: "" }); }}>
+            <button className="add-med-btn" onClick={() => { setShowMedForm(!showMedForm); setEditingMedId(null); setMedForm({ name: "", description: "", price: "", stock: "" }); setMedErrors({}); }}>
               {showMedForm ? "Close Form" : "+ Add Medicine"}
             </button>
           </div>
 
           {showMedForm && (
-            <form className="med-form" onSubmit={handleMedSubmit}>
+            <form className="med-form" onSubmit={handleMedSubmit} noValidate>
               <input
                 id="med-name"
                 name="medName"
                 aria-label="Medicine name"
+                aria-invalid={medErrors.name ? "true" : "false"}
+                aria-describedby={medErrors.name ? "med-name-error" : undefined}
+                className={medErrors.name ? "input-error" : ""}
                 placeholder="Medicine name"
                 value={medForm.name}
-                onChange={(e) => setMedForm({ ...medForm, name: e.target.value })}
-                required
+                onChange={(e) => {
+                  setMedForm({ ...medForm, name: e.target.value });
+                  clearMedError("name");
+                }}
               />
+              {medErrors.name && (
+                <p id="med-name-error" className="field-error" role="alert">{medErrors.name}</p>
+              )}
               <input
                 id="med-description"
                 name="medDescription"
@@ -807,22 +928,44 @@ function DoctorDashboard() {
                 name="medPrice"
                 aria-label="Medicine price"
                 type="number"
+                min="0"
+                step="0.01"
+                aria-invalid={medErrors.price ? "true" : "false"}
+                aria-describedby={medErrors.price ? "med-price-error" : undefined}
+                className={medErrors.price ? "input-error" : ""}
                 placeholder="Price (₹)"
                 value={medForm.price}
-                onChange={(e) => setMedForm({ ...medForm, price: e.target.value })}
-                required
+                onChange={(e) => {
+                  setMedForm({ ...medForm, price: e.target.value });
+                  clearMedError("price");
+                }}
               />
+              {medErrors.price && (
+                <p id="med-price-error" className="field-error" role="alert">{medErrors.price}</p>
+              )}
               <input
                 id="med-stock"
                 name="medStock"
                 aria-label="Stock quantity"
                 type="number"
+                min="0"
+                step="1"
+                aria-invalid={medErrors.stock ? "true" : "false"}
+                aria-describedby={medErrors.stock ? "med-stock-error" : undefined}
+                className={medErrors.stock ? "input-error" : ""}
                 placeholder="Stock quantity"
                 value={medForm.stock}
-                onChange={(e) => setMedForm({ ...medForm, stock: e.target.value })}
-                required
+                onChange={(e) => {
+                  setMedForm({ ...medForm, stock: e.target.value });
+                  clearMedError("stock");
+                }}
               />
-              <button type="submit">{editingMedId ? "Update" : "Add"} Medicine</button>
+              {medErrors.stock && (
+                <p id="med-stock-error" className="field-error" role="alert">{medErrors.stock}</p>
+              )}
+              <button type="submit" disabled={medSubmitting} style={{ opacity: medSubmitting ? 0.7 : 1, cursor: medSubmitting ? "not-allowed" : "pointer" }}>
+                {medSubmitting ? "Saving..." : (editingMedId ? "Update" : "Add") + " Medicine"}
+              </button>
             </form>
           )}
 

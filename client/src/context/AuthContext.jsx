@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
     if (storedUser) {
       try {
         return JSON.parse(storedUser);
-      } catch (err) {
+      } catch {
         return null;
       }
     }
@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }) => {
 
   const [showReloginModal, setShowReloginModal] = useState(false);
   const [reloginPassword, setReloginPassword] = useState("");
+  const [reloginError, setReloginError] = useState("");
   const [isReloggingIn, setIsReloggingIn] = useState(false);
 
   const login = (userData, userToken) => {
@@ -31,14 +32,16 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     setToken(userToken);
     setShowReloginModal(false);
+    setReloginError("");
   };
 
   const logout = (showToast = false, message = "Logged out") => {
     // If it's a doctor session expiry, show modal instead of completely logging out
     if (message.includes("Session expired") && user?.role === "doctor") {
       setShowReloginModal(true);
+      setReloginError("");
       if (showToast) {
-        toast.error("Session expired, please re-authenticate to continue");
+        toast.error("Your session has expired. Please sign in again.");
       }
       return;
     }
@@ -48,8 +51,9 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     setShowReloginModal(false);
+    setReloginError("");
     if (showToast) {
-       toast.error(message);
+      toast.error(message || "Logged out");
     }
   };
 
@@ -63,7 +67,7 @@ export const AuthProvider = ({ children }) => {
       const exp = decoded.exp;
       const expired = (Date.now() >= exp * 1000);
       return expired;
-    } catch (e) {
+    } catch {
       return true;
     }
   };
@@ -76,6 +80,14 @@ export const AuthProvider = ({ children }) => {
 
   const handleReloginSubmit = async (e) => {
     e.preventDefault();
+    setReloginError("");
+
+    // Client-side validation
+    if (!reloginPassword) {
+      setReloginError("Please enter your password.");
+      return;
+    }
+
     setIsReloggingIn(true);
     try {
       const res = await fetch(`${API_URL}/users/login`, {
@@ -86,13 +98,16 @@ export const AuthProvider = ({ children }) => {
       const data = await res.json();
       if (res.ok) {
         login(data.user, data.token);
-        toast.success("Re-authenticated successfully! You can resume.");
+        toast.success("Welcome back! You can continue where you left off.");
         setReloginPassword("");
       } else {
-        toast.error("Incorrect password");
+        const message = data.message && data.message.includes("expired") || data.message === "Incorrect email or password."
+          ? "Incorrect password."
+          : "We couldn't verify your password. Please try again.";
+        setReloginError(message);
       }
-    } catch (err) {
-      toast.error("Error re-authenticating");
+    } catch {
+      setReloginError("We couldn't verify your password right now. Please try again.");
     } finally {
       setIsReloggingIn(false);
     }
@@ -116,22 +131,39 @@ export const AuthProvider = ({ children }) => {
             <p style={{ margin: "0 0 20px 0", color: "#666", fontSize: "0.95rem" }}>
               Please re-enter your password for <strong>{user.email}</strong> to continue where you left off.
             </p>
-            <form onSubmit={handleReloginSubmit}>
+            <form onSubmit={handleReloginSubmit} noValidate>
               <input
                 id="relogin-password"
                 name="password"
                 aria-label="Re-enter your password"
+                aria-invalid={reloginError ? "true" : "false"}
+                aria-describedby={reloginError ? "relogin-password-error" : undefined}
                 type="password"
                 placeholder="Enter password"
                 value={reloginPassword}
-                onChange={(e) => setReloginPassword(e.target.value)}
+                onChange={(e) => {
+                  setReloginPassword(e.target.value);
+                  if (reloginError) setReloginError("");
+                }}
                 style={{
-                  width: "100%", padding: "12px", border: "1px solid #ddd",
-                  borderRadius: "6px", marginBottom: "20px", fontSize: "1rem"
+                  width: "100%", padding: "12px", border: reloginError ? "1px solid #c0392b" : "1px solid #ddd",
+                  borderRadius: "6px", marginBottom: "20px", fontSize: "1rem", boxSizing: "border-box"
                 }}
                 required
                 autoFocus
               />
+              {reloginError && (
+                <p
+                  id="relogin-password-error"
+                  role="alert"
+                  style={{
+                    color: "#c0392b", fontSize: "0.85rem", margin: "-10px 0 16px 0",
+                    background: "#fdedec", padding: "8px 12px", borderRadius: "6px"
+                  }}
+                >
+                  {reloginError}
+                </p>
+              )}
               <div style={{ display: "flex", gap: "10px" }}>
                 <button
                   type="submit"
@@ -139,7 +171,7 @@ export const AuthProvider = ({ children }) => {
                   style={{
                     flex: 1, padding: "12px", background: "#3498db", color: "#fff",
                     border: "none", borderRadius: "6px", cursor: isReloggingIn ? "not-allowed" : "pointer",
-                    fontWeight: "600"
+                    fontWeight: "600", opacity: isReloggingIn ? 0.7 : 1
                   }}
                 >
                   {isReloggingIn ? "Authenticating..." : "Resume Session"}
@@ -149,7 +181,6 @@ export const AuthProvider = ({ children }) => {
                   disabled={isReloggingIn}
                   onClick={() => {
                     setShowReloginModal(false);
-                    // Force complete logout if they cancel
                     logout(true, "Logged out manually");
                   }}
                   style={{

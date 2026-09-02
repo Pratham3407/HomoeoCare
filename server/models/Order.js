@@ -5,7 +5,7 @@ const orderSchema = new mongoose.Schema(
     patientId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: [true, "Patient information is required."],
     },
 
     items: [
@@ -18,6 +18,7 @@ const orderSchema = new mongoose.Schema(
         quantity: {
           type: Number,
           default: 1,
+          min: [1, "Quantity must be at least 1."],
         },
         price: Number,
       },
@@ -25,25 +26,32 @@ const orderSchema = new mongoose.Schema(
 
     totalAmount: {
       type: Number,
-      required: true,
+      required: [true, "Order total is required."],
+      min: [0, "Total must be a positive number."],
     },
 
     shippingAddress: {
-      street: String,
-      city: String,
-      state: String,
-      pincode: String,
+      street: { type: String, default: "" },
+      city: { type: String, default: "" },
+      state: { type: String, default: "" },
+      pincode: { type: String, default: "" },
     },
 
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "confirmed_by_doctor"],
+      enum: {
+        values: ["pending", "paid", "confirmed_by_doctor"],
+        message: "Please select a valid payment status.",
+      },
       default: "pending",
     },
 
     orderStatus: {
       type: String,
-      enum: ["placed", "reviewed", "shipped", "delivered", "cancelled"],
+      enum: {
+        values: ["placed", "reviewed", "shipped", "delivered", "cancelled"],
+        message: "Please select a valid order status.",
+      },
       default: "placed",
     },
 

@@ -16,8 +16,10 @@ function MyOrders() {
     }
 
     apiFetch(`/orders/my-orders/${user._id}`, {}, logout)
-      .then((res) => res.json())
-      .then((data) => setOrders(data));
+      .then((res) => {
+        if (res.ok) setOrders(res.data);
+        else setOrders([]);
+      });
   }, [user, navigate]);
 
   return (

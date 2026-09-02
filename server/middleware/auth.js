@@ -4,7 +4,11 @@ const protect = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Not authorized, no token" });
+    return res.status(401).json({
+      success: false,
+      message: "Please sign in to continue.",
+      fieldErrors: {},
+    });
   }
 
   const token = authHeader.split(" ")[1];
@@ -14,14 +18,22 @@ const protect = (req, res, next) => {
     req.user = decoded; // { id, role }
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Session expired, please log in again" });
+    return res.status(401).json({
+      success: false,
+      message: "Your session has expired. Please sign in again.",
+      fieldErrors: {},
+    });
   }
 };
 
 // Doctor-only middleware
 const doctorOnly = (req, res, next) => {
   if (req.user?.role !== "doctor") {
-    return res.status(403).json({ message: "Access denied: doctors only" });
+    return res.status(403).json({
+      success: false,
+      message: "You don't have permission to access this area.",
+      fieldErrors: {},
+    });
   }
   next();
 };
@@ -29,7 +41,11 @@ const doctorOnly = (req, res, next) => {
 // Patient-only middleware
 const patientOnly = (req, res, next) => {
   if (req.user?.role !== "patient") {
-    return res.status(403).json({ message: "Access denied: patients only" });
+    return res.status(403).json({
+      success: false,
+      message: "You don't have permission to access this area.",
+      fieldErrors: {},
+    });
   }
   next();
 };

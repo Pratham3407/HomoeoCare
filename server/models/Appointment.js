@@ -5,6 +5,7 @@ const appointmentSchema = new mongoose.Schema(
     patientId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: [true, "Patient information is required."],
     },
 
     doctorId: {
@@ -12,24 +13,40 @@ const appointmentSchema = new mongoose.Schema(
       ref: "User",
     },
 
-    date: String,
-    time: String,
+    date: {
+      type: String,
+      required: [true, "Please select a date."],
+    },
+
+    time: {
+      type: String,
+      required: [true, "Please select a time."],
+    },
 
     type: {
       type: String,
-      enum: ["offline", "online"],
+      enum: {
+        values: ["offline", "online"],
+        message: "Please select a valid appointment type.",
+      },
       default: "offline",
     },
 
     consultationType: {
       type: String,
-      enum: ["General Consultation", "Chronic Disease", "Follow-up"],
+      enum: {
+        values: ["General Consultation", "Chronic Disease", "Follow-up"],
+        message: "Please select a valid consultation type.",
+      },
       default: "General Consultation",
     },
 
     status: {
       type: String,
-      enum: ["pending", "approved", "cancelled", "postponed", "completed"],
+      enum: {
+        values: ["pending", "approved", "cancelled", "postponed", "completed"],
+        message: "Please select a valid status.",
+      },
       default: "pending",
     },
 

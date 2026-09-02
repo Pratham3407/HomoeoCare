@@ -4,7 +4,8 @@ const medicineSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, "Please enter the medicine name."],
+      trim: true,
     },
     description: {
       type: String,
@@ -12,11 +13,13 @@ const medicineSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: true,
+      required: [true, "Please enter a price."],
+      min: [0, "Price must be a positive number."],
     },
     stock: {
       type: Number,
       default: 0,
+      min: [0, "Stock must be a positive number."],
     },
   },
   { timestamps: true },

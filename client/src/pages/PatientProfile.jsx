@@ -3,8 +3,10 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import "../styles/profile.css";
+import "../styles/error-states.css";
 import { apiFetch } from "../utils/api";
-import API_URL, { SERVER_URL } from "../config";
+import { SERVER_URL } from "../config";
+import { validate, isTechnicalMessage } from "../utils/errors";
 
 function PatientProfile() {
   const navigate = useNavigate();
@@ -24,6 +26,8 @@ function PatientProfile() {
   // Report state
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportForm, setReportForm] = useState({ name: "", file: null });
+  const [reportErrors, setReportErrors] = useState({});
+  const [reportSubmitting, setReportSubmitting] = useState(false);
   const [editingReportId, setEditingReportId] = useState(null);
 
   // Profile edit state
@@ -35,6 +39,8 @@ function PatientProfile() {
     newPassword: "",
     profilePhoto: "",
   });
+  const [profileErrors, setProfileErrors] = useState({});
+  const [profileSubmitting, setProfileSubmitting] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -48,29 +54,40 @@ function PatientProfile() {
     if (!user) return;
     if (activeTab === "appointments") {
       apiFetch(`/appointments/my-appointments/${user._id}`, {}, logout)
-        .then((res) => res.json())
-        .then((data) => setAppointments(data));
+        .then((res) => res.ok && setAppointments(res.data));
     }
     if (activeTab === "orders") {
       apiFetch(`/orders/my-orders/${user._id}`, {}, logout)
-        .then((res) => res.json())
-        .then((data) => setOrders(data));
+        .then((res) => res.ok && setOrders(res.data));
     }
     if (activeTab === "reports") {
       apiFetch(`/reports/patient/${user._id}`, {}, logout)
-        .then((res) => res.json())
-        .then((data) => setReports(data));
+        .then((res) => res.ok && setReports(res.data));
     }
   }, [activeTab, user]);
 
   const fetchReports = async () => {
     const res = await apiFetch(`/reports/patient/${user._id}`, {}, logout);
-    const data = await res.json();
-    setReports(data);
+    if (res.ok) setReports(res.data);
   };
 
   const handleReportSubmit = async (e) => {
     e.preventDefault();
+
+    // Client-side validation
+    const fieldErrors = {};
+    if (!reportForm.name || !reportForm.name.trim()) fieldErrors.name = "Please enter a report name.";
+    if (!editingReportId && !reportForm.file) fieldErrors.file = "Please choose a file to upload.";
+    if (reportForm.file && reportForm.file.size > 25 * 1024 * 1024) fieldErrors.file = "File size must be less than 25MB.";
+
+    if (Object.keys(fieldErrors).length > 0) {
+      setReportErrors(fieldErrors);
+      return;
+    }
+
+    setReportErrors({});
+    setReportSubmitting(true);
+
     const formData = new FormData();
     formData.append("name", reportForm.name);
     if (reportForm.file) formData.append("file", reportForm.file);
@@ -78,8 +95,8 @@ function PatientProfile() {
     try {
       const url = editingReportId ? `/reports/${editingReportId}` : `/reports`;
       const method = editingReportId ? "PUT" : "POST";
-      
-      const res = await fetch(`${API_URL}${url}`, {
+
+      const response = await fetch(`${SERVER_URL}/api${url}`, {
         method,
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -87,18 +104,30 @@ function PatientProfile() {
         body: formData,
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        toast.success(data.message);
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
+
+      if (response.ok) {
+        toast.success(editingReportId ? "Report updated successfully." : "Report uploaded successfully.");
         setShowReportForm(false);
         setReportForm({ name: "", file: null });
         setEditingReportId(null);
         fetchReports();
       } else {
-        toast.error(data.message);
+        const originalMessage = data.message;
+        const message = originalMessage && !isTechnicalMessage(originalMessage)
+          ? originalMessage
+          : "We couldn't save your report right now. Please try again.";
+        toast.error(message);
       }
     } catch {
-      toast.error("Error saving report");
+      toast.error("We couldn't save your report right now. Please try again.");
+    } finally {
+      setReportSubmitting(false);
     }
   };
 
@@ -107,33 +136,72 @@ function PatientProfile() {
     try {
       const res = await apiFetch(`/reports/${id}`, { method: "DELETE" }, logout);
       if (res.ok) {
-        toast.success("Report deleted");
+        toast.success("Report deleted successfully.");
         fetchReports();
+      } else {
+        toast.error(res.message);
       }
     } catch {
-      toast.error("Error deleting report");
+      toast.error("We couldn't delete this report right now. Please try again.");
     }
   };
 
-
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
+
+    // Client-side validation
+    const fieldErrors = {};
+
+    const nameError = validate.name(profileForm.name);
+    if (nameError) fieldErrors.name = nameError;
+
+    const emailError = validate.email(profileForm.email);
+    if (emailError) fieldErrors.email = emailError;
+
+    if (profileForm.newPassword) {
+      const pwdError = validate.password(profileForm.newPassword);
+      if (pwdError) fieldErrors.newPassword = pwdError;
+      if (!profileForm.currentPassword) fieldErrors.currentPassword = "Please enter your current password.";
+    }
+
+    if (profileForm.currentPassword && !profileForm.newPassword) {
+      fieldErrors.newPassword = "Please enter your new password.";
+    }
+
+    if (Object.keys(fieldErrors).length > 0) {
+      setProfileErrors(fieldErrors);
+      return;
+    }
+
+    setProfileErrors({});
+    setProfileSubmitting(true);
+
     try {
       const res = await apiFetch(`/users/update/${user._id}`, {
         method: "PUT",
         body: JSON.stringify(profileForm),
       }, logout);
-      const data = await res.json();
+
       if (res.ok) {
-        toast.success(data.message);
-        login(data.user); // update context
+        const data = res.data;
+        toast.success(data.message || "Profile updated successfully.");
+        if (data.user) {
+          // Preserve token in context since data.user doesn't include it
+          login(data.user, localStorage.getItem("token"));
+        }
         setEditing(false);
         setProfileForm({ ...profileForm, currentPassword: "", newPassword: "" });
       } else {
-        toast.error(data.message);
+        if (res.fieldErrors && Object.keys(res.fieldErrors).length > 0) {
+          setProfileErrors(res.fieldErrors);
+        } else {
+          toast.error(res.message);
+        }
       }
     } catch {
-      toast.error("Error updating profile");
+      toast.error("We couldn't update your profile right now. Please try again.");
+    } finally {
+      setProfileSubmitting(false);
     }
   };
 
@@ -183,6 +251,18 @@ function PatientProfile() {
   const handleLogout = () => {
     logout();
     navigate("/");
+  };
+
+  const clearProfileError = (field) => {
+    if (profileErrors[field]) {
+      setProfileErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const clearReportError = (field) => {
+    if (reportErrors[field]) {
+      setReportErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
   };
 
   if (!user) return null;
@@ -236,27 +316,45 @@ function PatientProfile() {
                 <div className="info-row"><span className="info-label">Name</span><span>{user.name}</span></div>
                 <div className="info-row"><span className="info-label">Email</span><span>{user.email}</span></div>
                 <div className="info-row"><span className="info-label">Role</span><span className="role-badge">{user.role}</span></div>
-                <button className="edit-btn" onClick={() => setEditing(true)}>Edit Profile</button>
+                <button className="edit-btn" onClick={() => { setEditing(true); setProfileErrors({}); }}>Edit Profile</button>
               </div>
             ) : (
-              <form className="edit-form" onSubmit={handleProfileUpdate}>
+              <form className="edit-form" onSubmit={handleProfileUpdate} noValidate>
                 <label htmlFor="profile-name">Name</label>
                 <input
                   id="profile-name"
                   name="name"
                   value={profileForm.name}
-                  onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                  required
+                  aria-invalid={profileErrors.name ? "true" : "false"}
+                  aria-describedby={profileErrors.name ? "profile-name-error" : undefined}
+                  className={profileErrors.name ? "input-error" : ""}
+                  onChange={(e) => {
+                    setProfileForm({ ...profileForm, name: e.target.value });
+                    clearProfileError("name");
+                  }}
                 />
+                {profileErrors.name && (
+                  <p id="profile-name-error" className="field-error" role="alert">{profileErrors.name}</p>
+                )}
+
                 <label htmlFor="profile-email">Email</label>
                 <input
                   id="profile-email"
                   name="email"
                   type="email"
                   value={profileForm.email}
-                  onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                  required
+                  aria-invalid={profileErrors.email ? "true" : "false"}
+                  aria-describedby={profileErrors.email ? "profile-email-error" : undefined}
+                  className={profileErrors.email ? "input-error" : ""}
+                  onChange={(e) => {
+                    setProfileForm({ ...profileForm, email: e.target.value });
+                    clearProfileError("email");
+                  }}
                 />
+                {profileErrors.email && (
+                  <p id="profile-email-error" className="field-error" role="alert">{profileErrors.email}</p>
+                )}
+
                 <label htmlFor="profile-current-password">Current Password <span className="optional">(required to change password)</span></label>
                 <input
                   id="profile-current-password"
@@ -264,8 +362,18 @@ function PatientProfile() {
                   type="password"
                   placeholder="Enter current password"
                   value={profileForm.currentPassword}
-                  onChange={(e) => setProfileForm({ ...profileForm, currentPassword: e.target.value })}
+                  aria-invalid={profileErrors.currentPassword ? "true" : "false"}
+                  aria-describedby={profileErrors.currentPassword ? "profile-current-password-error" : undefined}
+                  className={profileErrors.currentPassword ? "input-error" : ""}
+                  onChange={(e) => {
+                    setProfileForm({ ...profileForm, currentPassword: e.target.value });
+                    clearProfileError("currentPassword");
+                  }}
                 />
+                {profileErrors.currentPassword && (
+                  <p id="profile-current-password-error" className="field-error" role="alert">{profileErrors.currentPassword}</p>
+                )}
+
                 <label htmlFor="profile-new-password">New Password <span className="optional">(leave blank to keep current)</span></label>
                 <input
                   id="profile-new-password"
@@ -273,8 +381,18 @@ function PatientProfile() {
                   type="password"
                   placeholder="Enter new password"
                   value={profileForm.newPassword}
-                  onChange={(e) => setProfileForm({ ...profileForm, newPassword: e.target.value })}
+                  aria-invalid={profileErrors.newPassword ? "true" : "false"}
+                  aria-describedby={profileErrors.newPassword ? "profile-new-password-error" : undefined}
+                  className={profileErrors.newPassword ? "input-error" : ""}
+                  onChange={(e) => {
+                    setProfileForm({ ...profileForm, newPassword: e.target.value });
+                    clearProfileError("newPassword");
+                  }}
                 />
+                {profileErrors.newPassword && (
+                  <p id="profile-new-password-error" className="field-error" role="alert">{profileErrors.newPassword}</p>
+                )}
+
                 <label htmlFor="profile-photo">Profile Photo</label>
                 <input
                   id="profile-photo"
@@ -283,6 +401,7 @@ function PatientProfile() {
                   accept="image/*"
                   onChange={handleFileChange}
                 />
+
                 {profileForm.profilePhoto && (
                   <img
                     src={profileForm.profilePhoto}
@@ -291,8 +410,14 @@ function PatientProfile() {
                   />
                 )}
                 <div className="form-actions">
-                  <button type="submit">Save Changes</button>
-                  <button type="button" className="cancel-btn" onClick={() => setEditing(false)}>Cancel</button>
+                  <button type="submit" disabled={profileSubmitting} style={{ opacity: profileSubmitting ? 0.7 : 1, cursor: profileSubmitting ? "not-allowed" : "pointer" }}>
+                    {profileSubmitting ? "Saving..." : "Save Changes"}
+                  </button>
+                  <button type="button" className="cancel-btn" onClick={() => {
+                    setEditing(false);
+                    setProfileErrors({});
+                    setProfileForm({ name: user.name, email: user.email, currentPassword: "", newPassword: "", profilePhoto: user.profilePhoto || "" });
+                  }}>Cancel</button>
                 </div>
               </form>
             )}
@@ -386,33 +511,52 @@ function PatientProfile() {
           <div className="tab-section">
             <div className="tab-header">
               <h2>My Medical Reports</h2>
-              <button className="action-btn" onClick={() => { setShowReportForm(!showReportForm); setEditingReportId(null); setReportForm({ name: "", file: null }); }}>
+              <button className="action-btn" onClick={() => { setShowReportForm(!showReportForm); setEditingReportId(null); setReportForm({ name: "", file: null }); setReportErrors({}); }}>
                 {showReportForm ? "Close Form" : "+ Add Report"}
               </button>
             </div>
 
             {showReportForm && (
-              <form className="edit-form" onSubmit={handleReportSubmit} style={{ marginBottom: "20px", background: "#fdfbf7", padding: "20px", borderRadius: "8px", border: "1px solid #e2d8c3" }}>
+              <form className="edit-form" onSubmit={handleReportSubmit} noValidate style={{ marginBottom: "20px", background: "#fdfbf7", padding: "20px", borderRadius: "8px", border: "1px solid #e2d8c3" }}>
                 <label htmlFor="report-name">Report Name</label>
                 <input
                   id="report-name"
                   name="reportName"
                   value={reportForm.name}
-                  onChange={e => setReportForm({ ...reportForm, name: e.target.value })}
+                  aria-invalid={reportErrors.name ? "true" : "false"}
+                  aria-describedby={reportErrors.name ? "report-name-error" : undefined}
+                  className={reportErrors.name ? "input-error" : ""}
+                  onChange={(e) => {
+                    setReportForm({ ...reportForm, name: e.target.value });
+                    clearReportError("name");
+                  }}
                   placeholder="e.g. Blood Test Results, MRI Scan"
-                  required
                 />
+                {reportErrors.name && (
+                  <p id="report-name-error" className="field-error" role="alert">{reportErrors.name}</p>
+                )}
+
                 <label htmlFor="report-file">File (Image or PDF, Max 25MB)</label>
                 <input
                   id="report-file"
                   name="reportFile"
                   type="file"
                   accept="image/*,.pdf"
-                  onChange={e => setReportForm({ ...reportForm, file: e.target.files[0] })}
-                  required={!editingReportId}
+                  aria-invalid={reportErrors.file ? "true" : "false"}
+                  aria-describedby={reportErrors.file ? "report-file-error" : undefined}
+                  onChange={(e) => {
+                    setReportForm({ ...reportForm, file: e.target.files[0] });
+                    clearReportError("file");
+                  }}
                 />
+                {reportErrors.file && (
+                  <p id="report-file-error" className="field-error" role="alert">{reportErrors.file}</p>
+                )}
+
                 <div className="form-actions" style={{ marginTop: "15px" }}>
-                  <button type="submit">{editingReportId ? "Update Report" : "Upload Report"}</button>
+                  <button type="submit" disabled={reportSubmitting} style={{ opacity: reportSubmitting ? 0.7 : 1, cursor: reportSubmitting ? "not-allowed" : "pointer" }}>
+                    {reportSubmitting ? "Saving..." : (editingReportId ? "Update Report" : "Upload Report")}
+                  </button>
                   <button type="button" className="cancel-btn" onClick={() => setShowReportForm(false)}>Cancel</button>
                 </div>
               </form>

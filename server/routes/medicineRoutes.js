@@ -1,52 +1,171 @@
 const express = require("express");
 const router = express.Router();
 const Medicine = require("../models/Medicine");
+const mongoose = require("mongoose");
 const { protect, doctorOnly } = require("../middleware/auth");
 
 // GET all medicines (public)
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
     const medicines = await Medicine.find();
     res.json(medicines);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching medicines" });
+    next(error);
   }
 });
 
 // POST — add a new medicine (doctor only)
-router.post("/", protect, doctorOnly, async (req, res) => {
+router.post("/", protect, doctorOnly, async (req, res, next) => {
   const { name, description, price, stock } = req.body;
 
+  const fieldErrors = {};
+
+  if (!name || !name.trim()) {
+    fieldErrors.name = "Please enter the medicine name.";
+  }
+
+  if (price === "" || price === null || price === undefined) {
+    fieldErrors.price = "Please enter a price.";
+  } else {
+    const num = Number(price);
+    if (isNaN(num) || num < 0) {
+      fieldErrors.price = "Please enter a valid price.";
+    }
+  }
+
+  if (stock !== undefined && stock !== "") {
+    const num = Number(stock);
+    if (isNaN(num) || num < 0 || !Number.isInteger(num)) {
+      fieldErrors.stock = "Please enter a valid stock quantity.";
+    }
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: fieldErrors[Object.keys(fieldErrors)[0]],
+      fieldErrors,
+    });
+  }
+
   try {
-    const medicine = new Medicine({ name, description, price, stock });
+    const medicine = new Medicine({
+      name: name.trim(),
+      description: description || "",
+      price: Number(price),
+      stock: stock === "" || stock === undefined ? 0 : Number(stock),
+    });
     await medicine.save();
-    res.status(201).json({ message: "Medicine added", medicine });
+    res.status(201).json({
+      success: true,
+      message: "Medicine added successfully.",
+      medicine,
+      fieldErrors: {},
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error adding medicine" });
+    next(error);
   }
 });
 
 // PUT — update a medicine (doctor only)
-router.put("/:id", protect, doctorOnly, async (req, res) => {
+router.put("/:id", protect, doctorOnly, async (req, res, next) => {
+  const { name, description, price, stock } = req.body;
+
+  const fieldErrors = {};
+
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({
+      success: false,
+      message: "The medicine you're looking for could not be found.",
+      fieldErrors: {},
+    });
+  }
+
+  if (name !== undefined && !name.trim()) {
+    fieldErrors.name = "Please enter the medicine name.";
+  }
+
+  if (price !== undefined && price !== "") {
+    const num = Number(price);
+    if (isNaN(num) || num < 0) {
+      fieldErrors.price = "Please enter a valid price.";
+    }
+  }
+
+  if (stock !== undefined && stock !== "") {
+    const num = Number(stock);
+    if (isNaN(num) || num < 0 || !Number.isInteger(num)) {
+      fieldErrors.stock = "Please enter a valid stock quantity.";
+    }
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: fieldErrors[Object.keys(fieldErrors)[0]],
+      fieldErrors,
+    });
+  }
+
   try {
+    const updateData = {};
+    if (name !== undefined) updateData.name = name.trim();
+    if (description !== undefined) updateData.description = description;
+    if (price !== undefined) updateData.price = Number(price);
+    if (stock !== undefined) updateData.stock = Number(stock);
+
     const medicine = await Medicine.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true },
     );
-    res.json(medicine);
+
+    if (!medicine) {
+      return res.status(404).json({
+        success: false,
+        message: "We couldn't find this medicine.",
+        fieldErrors: {},
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Medicine updated successfully.",
+      medicine,
+      fieldErrors: {},
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error updating medicine" });
+    next(error);
   }
 });
 
 // DELETE — remove a medicine (doctor only)
-router.delete("/:id", protect, doctorOnly, async (req, res) => {
+router.delete("/:id", protect, doctorOnly, async (req, res, next) => {
   try {
-    await Medicine.findByIdAndDelete(req.params.id);
-    res.json({ message: "Medicine deleted" });
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "The medicine you're looking for could not be found.",
+        fieldErrors: {},
+      });
+    }
+
+    const medicine = await Medicine.findByIdAndDelete(req.params.id);
+    if (!medicine) {
+      return res.status(404).json({
+        success: false,
+        message: "We couldn't find this medicine.",
+        fieldErrors: {},
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Medicine deleted successfully.",
+      fieldErrors: {},
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting medicine" });
+    next(error);
   }
 });
 

@@ -4,7 +4,6 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const Report = require("../models/Report");
-const User = require("../models/User");
 const { sendReportReviewEmail } = require("../utils/emailService");
 const { protect, doctorOnly, patientOnly } = require("../middleware/auth");
 
@@ -29,66 +28,99 @@ const upload = multer({
 });
 
 // POST /api/reports - Patient uploads a new report
-router.post("/", protect, patientOnly, upload.single("file"), async (req, res) => {
+router.post("/", protect, patientOnly, upload.single("file"), async (req, res, next) => {
   try {
     const { name } = req.body;
 
+    const fieldErrors = {};
+
     if (!name || !name.trim()) {
-      return res.status(400).json({ message: "Report name is required" });
+      fieldErrors.name = "Please enter a report name.";
     }
 
     if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
+      fieldErrors.file = "Please choose a file to upload.";
+    }
+
+    if (Object.keys(fieldErrors).length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: fieldErrors[Object.keys(fieldErrors)[0]],
+        fieldErrors,
+      });
     }
 
     const report = new Report({
       patientId: req.user.id,
-      name: name,
+      name: name.trim(),
       fileUrl: `/uploads/${req.file.filename}`,
     });
 
     await report.save();
-    res.status(201).json({ message: "Report uploaded successfully", report });
+    res.status(201).json({
+      success: true,
+      message: "Report uploaded successfully.",
+      report,
+      fieldErrors: {},
+    });
   } catch (error) {
-    console.error("Error uploading report:", error);
-    res.status(500).json({ message: "Error uploading report", error: error.message });
+    next(error);
   }
 });
 
 // GET /api/reports/patient/:patientId - Get patient's reports
-router.get("/patient/:patientId", protect, async (req, res) => {
+router.get("/patient/:patientId", protect, async (req, res, next) => {
   try {
     // Only the owner patient or a doctor can view reports
     if (req.user.role === "patient" && req.user.id !== req.params.patientId) {
-      return res.status(403).json({ message: "Not authorized" });
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to view these reports.",
+        fieldErrors: {},
+      });
     }
 
     const reports = await Report.find({ patientId: req.params.patientId }).sort({ createdAt: -1 });
     res.json(reports);
   } catch (error) {
-    console.error("Error fetching reports:", error);
-    res.status(500).json({ message: "Error fetching reports" });
+    next(error);
   }
 });
 
 // PUT /api/reports/:id - Update report name or replace file
-router.put("/:id", protect, patientOnly, upload.single("file"), async (req, res) => {
+router.put("/:id", protect, patientOnly, upload.single("file"), async (req, res, next) => {
   try {
     const { name } = req.body;
     const report = await Report.findById(req.params.id);
 
     if (!report) {
-      return res.status(404).json({ message: "Report not found" });
+      return res.status(404).json({
+        success: false,
+        message: "We couldn't find this report.",
+        fieldErrors: {},
+      });
     }
 
     if (report.patientId.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not authorized" });
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to update this report.",
+        fieldErrors: {},
+      });
     }
 
-    if (name) report.name = name;
+    if (name !== undefined && !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a report name.",
+        fieldErrors: { name: "Please enter a report name." },
+      });
+    }
+
+    if (name) report.name = name.trim();
 
     if (req.file) {
-      // Option: Delete old file here if it exists to save space
+      // Delete old file here if it exists to save space
       const oldPath = path.join(__dirname, "..", report.fileUrl);
       if (fs.existsSync(oldPath)) {
         fs.unlinkSync(oldPath);
@@ -100,24 +132,36 @@ router.put("/:id", protect, patientOnly, upload.single("file"), async (req, res)
     }
 
     await report.save();
-    res.json({ message: "Report updated successfully", report });
+    res.json({
+      success: true,
+      message: "Report updated successfully.",
+      report,
+      fieldErrors: {},
+    });
   } catch (error) {
-    console.error("Error updating report:", error);
-    res.status(500).json({ message: "Error updating report" });
+    next(error);
   }
 });
 
 // DELETE /api/reports/:id - Delete a report
-router.delete("/:id", protect, patientOnly, async (req, res) => {
+router.delete("/:id", protect, patientOnly, async (req, res, next) => {
   try {
     const report = await Report.findById(req.params.id);
 
     if (!report) {
-      return res.status(404).json({ message: "Report not found" });
+      return res.status(404).json({
+        success: false,
+        message: "We couldn't find this report.",
+        fieldErrors: {},
+      });
     }
 
     if (report.patientId.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not authorized" });
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to delete this report.",
+        fieldErrors: {},
+      });
     }
 
     // Delete file
@@ -127,24 +171,40 @@ router.delete("/:id", protect, patientOnly, async (req, res) => {
     }
 
     await Report.findByIdAndDelete(req.params.id);
-    res.json({ message: "Report deleted successfully" });
+    res.json({
+      success: true,
+      message: "Report deleted successfully.",
+      fieldErrors: {},
+    });
   } catch (error) {
-    console.error("Error deleting report:", error);
-    res.status(500).json({ message: "Error deleting report" });
+    next(error);
   }
 });
 
 // PUT /api/reports/:id/review - Doctor adds feedback
-router.put("/:id/review", protect, doctorOnly, async (req, res) => {
+router.put("/:id/review", protect, doctorOnly, async (req, res, next) => {
   try {
     const { doctorFeedback } = req.body;
+
+    if (!doctorFeedback || !doctorFeedback.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter your feedback.",
+        fieldErrors: { doctorFeedback: "Please enter your feedback." },
+      });
+    }
+
     const report = await Report.findById(req.params.id).populate("patientId");
 
     if (!report) {
-      return res.status(404).json({ message: "Report not found" });
+      return res.status(404).json({
+        success: false,
+        message: "We couldn't find this report.",
+        fieldErrors: {},
+      });
     }
 
-    report.doctorFeedback = doctorFeedback;
+    report.doctorFeedback = doctorFeedback.trim();
     report.status = "reviewed";
 
     await report.save();
@@ -159,10 +219,14 @@ router.put("/:id/review", protect, doctorOnly, async (req, res) => {
       }
     }
 
-    res.json({ message: "Feedback added successfully", report });
+    res.json({
+      success: true,
+      message: "Feedback added successfully.",
+      report,
+      fieldErrors: {},
+    });
   } catch (error) {
-    console.error("Error adding feedback:", error);
-    res.status(500).json({ message: "Error adding feedback" });
+    next(error);
   }
 });
 

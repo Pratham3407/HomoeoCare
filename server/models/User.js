@@ -1,33 +1,33 @@
 const mongoose = require("mongoose");
 
-//Defining how data will be stored in MongoDB
-/*
-    {
-    "name": "Rahul",
-    "email": "rahul@gmail.com",
-    "password": "encrypted_password",
-    "role": "patient"
-    }
-
-*/
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, "Please enter your name."],
+      trim: true,
+      minlength: [2, "Name must be at least 2 characters long."],
+      maxlength: [100, "Name must be no more than 100 characters."],
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "Please enter your email address."],
       unique: true,
+      trim: true,
+      lowercase: true,
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address."],
     },
     password: {
       type: String,
-      required: true,
+      required: [true, "Please enter a password."],
+      minlength: [6, "Password must be at least 6 characters long."],
     },
     role: {
       type: String,
-      enum: ["patient", "doctor"],
+      enum: {
+        values: ["patient", "doctor"],
+        message: "Please select a valid account type.",
+      },
       default: "patient",
     },
     profilePhoto: {

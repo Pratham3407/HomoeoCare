@@ -16,8 +16,10 @@ function MyAppointments() {
     }
 
     apiFetch(`/appointments/my-appointments/${user._id}`, {}, logout)
-      .then((res) => res.json())
-      .then((data) => setAppointments(data));
+      .then((res) => {
+        if (res.ok) setAppointments(res.data);
+        else setAppointments([]);
+      });
   }, [user, navigate]);
 
   return (
