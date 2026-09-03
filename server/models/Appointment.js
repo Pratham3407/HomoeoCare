@@ -64,6 +64,11 @@ const appointmentSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    meetLinkEmailSent: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true },
 );

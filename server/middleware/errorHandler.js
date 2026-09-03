@@ -30,18 +30,9 @@ const ERROR_MESSAGES = {
     invalid: "Please select a valid time.",
     default: "Please select a valid time.",
   },
-  "totalAmount": {
-    required: "Order total is required.",
-    invalid: "Please enter a valid amount.",
-    default: "Please enter a valid amount.",
-  },
   "patientId": {
     required: "Patient information is required.",
     default: "Patient information is required.",
-  },
-  "items": {
-    required: "Please add at least one item to your order.",
-    default: "Please add at least one item to your order.",
   },
   "fileUrl": {
     required: "Please upload a file.",
@@ -50,15 +41,6 @@ const ERROR_MESSAGES = {
   "reportName": {
     required: "Please enter a report name.",
     default: "Please enter a report name.",
-  },
-  "medicineName": {
-    required: "Please enter the medicine name.",
-    default: "Please enter the medicine name.",
-  },
-  "price": {
-    required: "Please enter a price.",
-    invalid: "Please enter a valid price.",
-    default: "Please enter a valid price.",
   },
 };
 

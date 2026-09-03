@@ -1,11 +1,32 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const Appointment = require("../models/Appointment");
-const { sendMeetLink } = require("../utils/emailService");
+const User = require("../models/User");
+const { sendConsultationInvite } = require("../utils/emailService");
+const { emitMeetingLinkUpdate } = require("../realtime/socket");
 const { protect, doctorOnly, patientOnly } = require("../middleware/auth");
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
+
+/**
+ * Resolves the clinic doctor that owns appointments.
+ * Falls back to the first doctor user if DOCTOR_EMAIL does not match a user.
+ */
+async function resolveClinicDoctor() {
+  const clinicEmail = (process.env.DOCTOR_EMAIL || "").toLowerCase();
+  let doctor = clinicEmail ? await User.findOne({ email: clinicEmail, role: "doctor" }) : null;
+  if (!doctor) {
+    doctor = await User.findOne({ role: "doctor" });
+  }
+  return doctor;
+}
+
+// Helper: verify the requesting user is the owning doctor of an appointment
+const isOwnerDoctor = (appointment, userId) => {
+  return appointment.doctorId?.toString() === userId;
+};
 
 // GET all appointments (doctor dashboard) — doctor only
 router.get("/", protect, doctorOnly, async (req, res, next) => {
@@ -107,6 +128,8 @@ router.post("/", protect, patientOnly, async (req, res, next) => {
   }
 
   try {
+    const clinicDoctor = await resolveClinicDoctor();
+
     const appointment = new Appointment({
       patientId,
       date,
@@ -114,6 +137,7 @@ router.post("/", protect, patientOnly, async (req, res, next) => {
       type: type || "offline",
       consultationType: consultationType || "General Consultation",
       reason: reason || "",
+      doctorId: clinicDoctor?._id || null,
     });
 
     await appointment.save();
@@ -132,10 +156,28 @@ router.put("/:id", protect, doctorOnly, async (req, res, next) => {
   const { status, date, time, reason, meetLink, prescription } = req.body;
 
   try {
-    if (req.params.id && !require("mongoose").Types.ObjectId.isValid(req.params.id)) {
+    if (req.params.id && !mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
         success: false,
         message: "The appointment you're looking for could not be found.",
+        fieldErrors: {},
+      });
+    }
+
+    const appointment = await Appointment.findById(req.params.id);
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "We couldn't find this appointment.",
+        fieldErrors: {},
+      });
+    }
+
+    // Only the owning doctor may modify an appointment
+    if (!isOwnerDoctor(appointment, req.user.id)) {
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to update this appointment.",
         fieldErrors: {},
       });
     }
@@ -158,27 +200,19 @@ router.put("/:id", protect, doctorOnly, async (req, res, next) => {
     if (meetLink !== undefined) updateData.meetLink = meetLink;
     if (prescription !== undefined) updateData.prescription = prescription;
 
-    const appointment = await Appointment.findByIdAndUpdate(
+    const updated = await Appointment.findByIdAndUpdate(
       req.params.id,
       updateData,
       { new: true },
     ).populate("patientId", "name email profilePhoto");
 
-    if (!appointment) {
-      return res.status(404).json({
-        success: false,
-        message: "We couldn't find this appointment.",
-        fieldErrors: {},
-      });
-    }
-
-    res.json(appointment);
+    res.json(updated);
   } catch (error) {
     next(error);
   }
 });
 
-// POST — send Google Meet link — doctor only
+// POST — send meeting link — doctor only (owner of the appointment)
 router.post("/:id/send-meet-link", protect, doctorOnly, async (req, res, next) => {
   const { meetLink } = req.body;
 
@@ -209,6 +243,15 @@ router.post("/:id/send-meet-link", protect, doctorOnly, async (req, res, next) =
       });
     }
 
+    // Only the owning doctor may set the meeting link
+    if (!isOwnerDoctor(appointment, req.user.id)) {
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to update this appointment.",
+        fieldErrors: {},
+      });
+    }
+
     if (!appointment.patientId?.email) {
       return res.status(400).json({
         success: false,
@@ -217,29 +260,52 @@ router.post("/:id/send-meet-link", protect, doctorOnly, async (req, res, next) =
       });
     }
 
+    // Persist the meeting link. Email is decoupled: saving must succeed even
+    // if email delivery fails later, so it is never rolled back.
     appointment.meetLink = meetLink;
     await appointment.save();
 
-    await sendMeetLink(
-      appointment.patientId.email,
-      appointment.patientId.name,
-      meetLink,
-      appointment.date,
-      appointment.time,
-    );
+    // Real-time broadcast (independent of email)
+    emitMeetingLinkUpdate(appointment._id, meetLink, appointment.updatedAt?.toISOString());
 
-    res.json({
+    // Send the invitation email only when this specific link value has not
+    // already been emailed. Sending the same link twice is skipped to avoid
+    // duplicate emails from rerenders/retries/reconnects.
+    const isUpdate = appointment.meetLinkEmailSent && appointment.meetLinkEmailSent.length > 0;
+    const shouldEmail = meetLink !== appointment.meetLinkEmailSent;
+    let emailFailed = false;
+
+    if (shouldEmail) {
+      try {
+        const doctor = await User.findById(req.user.id).select("name");
+        await sendConsultationInvite({
+          patientEmail: appointment.patientId.email,
+          patientName: appointment.patientId.name,
+          doctorName: doctor?.name || "Your doctor",
+          date: appointment.date,
+          time: appointment.time,
+          meetLink,
+          isUpdate,
+        });
+        appointment.meetLinkEmailSent = meetLink;
+        await appointment.save();
+      } catch (emailError) {
+        // Email failure must not break the appointment. Log the provider error
+        // server-side only, keep the saved link, and inform the doctor friendly.
+        console.error("[send-meet-link] Email delivery failed:", emailError);
+        emailFailed = true;
+      }
+    }
+
+    res.status(200).json({
       success: true,
-      message: "Meeting link sent to the patient's email.",
+      message: emailFailed
+        ? "Meeting link saved, but we couldn't send the email invitation. Please try again."
+        : (shouldEmail ? "Meeting link saved and emailed to the patient." : "Meeting link saved."),
       fieldErrors: {},
     });
   } catch (error) {
-    console.error("Email error:", error);
-    res.status(500).json({
-      success: false,
-      message: "We couldn't send the meeting link right now. Please try again shortly.",
-      fieldErrors: {},
-    });
+    next(error);
   }
 });
 

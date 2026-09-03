@@ -10,10 +10,6 @@ function Features() {
           <h3>Online Consultation</h3>
           <p>Book appointment with certified homeopathy doctors.</p>
         </div>
-        <div className="card">
-          <h3>Medicine Ordering</h3>
-          <p>Order prescribed medicines directly from our platform.</p>
-        </div>
 
         <div className="card">
           <h3>Prescription History</h3>

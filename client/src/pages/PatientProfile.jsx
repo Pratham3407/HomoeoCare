@@ -7,20 +7,20 @@ import "../styles/error-states.css";
 import { apiFetch } from "../utils/api";
 import { SERVER_URL } from "../config";
 import { validate, isTechnicalMessage } from "../utils/errors";
+import { getSocket, MEET_LINK_EVENT } from "../realtime/clientSocket";
 
 function PatientProfile() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, login, logout } = useContext(AuthContext);
 
-  // Initialize active tab from URL query params (e.g. ?tab=orders)
+  // Initialize active tab from URL query params (e.g. ?tab=appointments)
   const [activeTab, setActiveTab] = useState(() => {
     const params = new URLSearchParams(location.search);
     return params.get("tab") || "profile";
   });
 
   const [appointments, setAppointments] = useState([]);
-  const [orders, setOrders] = useState([]);
   const [reports, setReports] = useState([]);
 
   // Report state
@@ -56,10 +56,6 @@ function PatientProfile() {
       apiFetch(`/appointments/my-appointments/${user._id}`, {}, logout)
         .then((res) => res.ok && setAppointments(res.data));
     }
-    if (activeTab === "orders") {
-      apiFetch(`/orders/my-orders/${user._id}`, {}, logout)
-        .then((res) => res.ok && setOrders(res.data));
-    }
     if (activeTab === "reports") {
       apiFetch(`/reports/patient/${user._id}`, {}, logout)
         .then((res) => res.ok && setReports(res.data));
@@ -70,6 +66,39 @@ function PatientProfile() {
     const res = await apiFetch(`/reports/patient/${user._id}`, {}, logout);
     if (res.ok) setReports(res.data);
   };
+
+  // Real-time meeting-link updates: when the doctor adds/changes a link for one
+  // of this patient's appointments, update it immediately without a refresh.
+  const subscribedAppointments = activeTab === "appointments" ? appointments : [];
+
+  useEffect(() => {
+    if (subscribedAppointments.length === 0 || !localStorage.getItem("token")) return undefined;
+
+    const s = getSocket();
+    if (!s.connected) s.connect();
+
+    const subscribeAll = () => {
+      subscribedAppointments.forEach((a) => {
+        s.emit("appointment:subscribe", { appointmentId: a._id });
+      });
+    };
+    subscribeAll();
+
+    const handleMeetLink = (event) => {
+      if (!event || !event.appointmentId || !event.meetingLink) return;
+      setAppointments((prev) =>
+        prev.map((a) => (a._id === event.appointmentId ? { ...a, meetLink: event.meetingLink } : a)),
+      );
+    };
+
+    s.on("connect", subscribeAll);
+    s.on(MEET_LINK_EVENT, handleMeetLink);
+
+    return () => {
+      s.off("connect", subscribeAll);
+      s.off(MEET_LINK_EVENT, handleMeetLink);
+    };
+  }, [subscribedAppointments]);
 
   const handleReportSubmit = async (e) => {
     e.preventDefault();
@@ -289,9 +318,6 @@ function PatientProfile() {
           <button className={activeTab === "appointments" ? "active" : ""} onClick={() => setActiveTab("appointments")}>
             My Appointments
           </button>
-          <button className={activeTab === "orders" ? "active" : ""} onClick={() => setActiveTab("orders")}>
-            My Orders
-          </button>
           <button className={activeTab === "reports" ? "active" : ""} onClick={() => setActiveTab("reports")}>
             My Reports
           </button>
@@ -299,7 +325,6 @@ function PatientProfile() {
 
         <div className="profile-quick-actions">
           <Link to="/appointment"><button className="quick-btn">Book Appointment</button></Link>
-          <Link to="/order-medicine"><button className="quick-btn">Order Medicine</button></Link>
         </div>
 
         <button className="logout-btn" onClick={handleLogout}>Logout</button>
@@ -448,57 +473,27 @@ function PatientProfile() {
                     </div>
                     <p><b>Time:</b> {a.time}</p>
                     {a.reason && <p className="record-note"><b>Note:</b> {a.reason}</p>}
-                    {a.meetLink && (
-                      <a href={a.meetLink} target="_blank" rel="noreferrer" style={{ display: "inline-block", marginTop: "10px", padding: "8px 16px", background: "#4a7c59", color: "#fff", textDecoration: "none", borderRadius: "6px", fontSize: "0.9rem", fontWeight: "600" }}>
-                        📹 Join Video Call
-                      </a>
-                    )}
+                    {a.type === "online" &&
+                      (a.meetLink ? (
+                        <div style={{ marginTop: "10px" }}>
+                          <p style={{ margin: "0 0 8px 0", fontSize: "0.9rem", color: "#4a7c59", fontWeight: "600" }}>
+                            Your doctor has added a meeting link.
+                          </p>
+                          <a href={a.meetLink} target="_blank" rel="noreferrer" style={{ display: "inline-block", padding: "8px 16px", background: "#4a7c59", color: "#fff", textDecoration: "none", borderRadius: "6px", fontSize: "0.9rem", fontWeight: "600" }}>
+                            Join Meeting
+                          </a>
+                        </div>
+                      ) : (
+                        <p style={{ marginTop: "10px", fontSize: "0.9rem", color: "#888" }}>
+                          No meeting link has been added yet.
+                        </p>
+                      ))}
                     {a.prescription && a.status === "completed" && (
                       <div className="appt-prescription" style={{ marginTop: "12px", padding: "12px", background: "#f0f8ff", borderLeft: "4px solid #2980b9", borderRadius: "4px" }}>
                         <h4 style={{ margin: "0 0 8px 0", color: "#2980b9", fontSize: "1rem" }}>Doctor's Prescription & Notes:</h4>
                         <p style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: "0.95rem" }}>{a.prescription}</p>
                       </div>
                     )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ORDERS TAB */}
-        {activeTab === "orders" && (
-          <div className="tab-section">
-            <div className="tab-header">
-              <h2>My Orders</h2>
-              <Link to="/order-medicine"><button className="action-btn">+ New Order</button></Link>
-            </div>
-            {orders.length === 0 ? (
-              <p className="no-data">No orders yet.</p>
-            ) : (
-              <div className="records-list">
-                {orders.map((order) => (
-                  <div className="record-card" key={order._id}>
-                    <div className="record-header">
-                      <span className="record-id">#{order._id.slice(-8).toUpperCase()}</span>
-                      <span className="record-date">{new Date(order.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <div className="order-items-list">
-                      {order.items.map((item, i) => (
-                        <span key={i} className="order-item-tag">{item.name} × {item.quantity}</span>
-                      ))}
-                    </div>
-                    <div className="record-footer">
-                      <span><b>Total:</b> ₹{order.totalAmount}</span>
-                      <span className={`record-badge ${order.paymentStatus}`}>
-                        {order.paymentStatus === "confirmed_by_doctor" ? "Paid ✓" : order.paymentStatus}
-                      </span>
-                      <span className={`record-badge ${order.orderStatus}`}>{order.orderStatus}</span>
-                    </div>
-                    {order.trackingId && <p className="tracking-info">📦 Tracking: {order.trackingId}</p>}
-                    <p className="shipping-info">
-                      {order.shippingAddress?.street}, {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.pincode}
-                    </p>
                   </div>
                 ))}
               </div>

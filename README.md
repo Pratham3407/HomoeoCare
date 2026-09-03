@@ -1,7 +1,7 @@
 # HomeoCare -- MERN Stack Web Application
 
 HomeoCare is a full-stack MERN web application for online homeopathy
-consultation and medicine services.
+consultation services.
 
 This project demonstrates:
 

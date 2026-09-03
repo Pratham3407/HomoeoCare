@@ -5,7 +5,7 @@ function About() {
     <section className="about">
       <h2>About HomeoCare</h2>
       <p>
-        HomeoCare provides trusted homeopathy consultation and medicine delivery services
+        HomeoCare provides trusted homeopathy consultation services
         online. Our goal is to make healthcare simple and accessible.
       </p>
     </section>

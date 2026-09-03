@@ -1,11 +1,71 @@
+/* =============================================
+   DOCTOR DASHBOARD — Scoped Color Palette
+   All variables scoped under .dashboard so
+   patient-facing pages remain unaffected.
+   ============================================= */
+
 .dashboard {
+  /* Doctor Dashboard palette tokens */
+  --dd-bg: #f5f7f4;
+  --dd-card-bg: #ffffff;
+  --dd-card-border: #e0e4dc;
+  --dd-card-shadow: rgba(0, 0, 0, 0.05);
+
+  --dd-text-primary: #2c3e2d;
+  --dd-text-secondary: #637063;
+  --dd-text-muted: #8a958a;
+
+  --dd-green: #3d7a4a;
+  --dd-green-hover: #326a3e;
+  --dd-green-light: #e8f0ea;
+  --dd-green-soft: #f0f5f1;
+
+  --dd-red: #c0392b;
+  --dd-red-hover: #a93226;
+
+  --dd-postpone: #7d5ba6;
+  --dd-postpone-hover: #6b4d90;
+
+  --dd-online-bg: #e8f5e9;
+  --dd-online-text: #2e7d32;
+
+  --dd-inperson-bg: #f0ece4;
+  --dd-inperson-text: #5d5340;
+
+  --dd-prescription-bg: #f0f5f1;
+  --dd-prescription-border: #d4e0d6;
+
+  --dd-filter-bg: #f0f5f1;
+  --dd-filter-border: #e0e4dc;
+
+  --dd-input-border: #cdd5ce;
+  --dd-input-focus: #3d7a4a;
+
+  --dd-modal-bg: #f5f9f6;
+  --dd-modal-border: #d4e0d6;
+
+  --dd-link: #3d7a4a;
+
+  --dd-avatar-bg: #e8f0ea;
+  --dd-avatar-text: #3d7a4a;
+
+  --dd-pending: #c68a17;
+  --dd-approved: #3d7a4a;
+  --dd-completed: #637063;
+  --dd-cancelled: #c0392b;
+  --dd-postponed: #7d5ba6;
+
+  /* Apply base */
   padding: 40px;
   max-width: 1200px;
   margin: 0 auto;
+  background-color: var(--dd-bg);
+  color: var(--dd-text-primary);
 }
 
 .dashboard h2 {
   margin-bottom: 10px;
+  color: var(--dd-text-primary);
 }
 
 /* Tabs */
@@ -13,7 +73,7 @@
   display: flex;
   gap: 10px;
   margin-bottom: 30px;
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 2px solid var(--dd-card-border);
   padding-bottom: 0;
 }
 
@@ -24,18 +84,18 @@
   cursor: pointer;
   font-size: 1rem;
   font-family: 'Source Sans 3', sans-serif;
-  color: var(--text-color);
+  color: var(--dd-text-secondary);
   border-bottom: 3px solid transparent;
-  transition: all 0.2s;
+  transition: color 0.2s, border-color 0.2s;
 }
 
 .tab:hover {
-  color: var(--primary-color);
+  color: var(--dd-green);
 }
 
 .active-tab {
-  color: var(--primary-color);
-  border-bottom: 3px solid var(--primary-color);
+  color: var(--dd-green);
+  border-bottom: 3px solid var(--dd-green);
   font-weight: 600;
 }
 
@@ -47,36 +107,48 @@
 }
 
 .appointment-card {
-  background: #ffffff;
-  border: 1px solid #d5cfc4;
+  background: var(--dd-card-bg);
+  border: 1px solid var(--dd-card-border);
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--dd-card-shadow);
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .appointment-card h3 {
   margin-bottom: 10px;
+  color: var(--dd-text-primary);
 }
 
-.status {
+.appointment-card h4 {
+  color: var(--dd-text-primary);
+}
+
+.appointment-card p {
+  color: var(--dd-text-primary);
+}
+
+.appointment-card b {
+  color: var(--dd-text-primary);
+}
+
+/* Status badges */
+.dashboard .status {
   margin: 8px 0;
   font-weight: bold;
   text-transform: capitalize;
 }
 
-.status.pending, .badge.pending { color: #d4910e; }
-.status.approved, .badge.reviewed { color: var(--primary-color); }
-.status.completed, .badge.delivered { color: #888; }
-.status.cancelled, .badge.cancelled { color: #c0392b; }
-.status.postponed { color: #8e44ad; }
-.status.paid, .badge.paid { color: var(--primary-color); }
-.status.confirmed_by_doctor, .badge.confirmed_by_doctor { color: #27ae60; }
-.status.placed, .badge.placed { color: #d4910e; }
-.status.shipped, .badge.shipped { color: #2980b9; }
+.dashboard .status.pending   { color: var(--dd-pending); }
+.dashboard .status.approved  { color: var(--dd-approved); }
+.dashboard .status.completed { color: var(--dd-completed); }
+.dashboard .status.cancelled { color: var(--dd-cancelled); }
+.dashboard .status.postponed { color: var(--dd-postponed); }
 
 .reason {
   font-style: italic;
-  color: #888;
+  color: var(--dd-text-muted);
   font-size: 0.9rem;
 }
 
@@ -91,46 +163,69 @@
 .card-actions button {
   padding: 8px 14px;
   border: none;
-  background: #4a7c59;
+  background: var(--dd-green);
   color: #ffffff;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
-  transition: background 0.2s;
+  transition: background 0.2s, box-shadow 0.2s;
 }
 
 .card-actions button:hover {
-  background: #3d6a4b;
+  background: var(--dd-green-hover);
+  box-shadow: 0 2px 6px rgba(61, 122, 74, 0.25);
+}
+
+.card-actions button:focus-visible {
+  outline: 2px solid var(--dd-green);
+  outline-offset: 2px;
 }
 
 .btn-cancel {
-  background: #c0392b !important;
+  background: var(--dd-red) !important;
 }
 
 .btn-cancel:hover {
-  background: #a93226 !important;
+  background: var(--dd-red-hover) !important;
 }
 
 .btn-postpone {
-  background: #8e44ad !important;
+  background: var(--dd-postpone) !important;
 }
 
 .btn-postpone:hover {
-  background: #7d3c98 !important;
+  background: var(--dd-postpone-hover) !important;
 }
 
-/* Postpone Modal */
+/* Back navigation button — not destructive */
+.btn-back {
+  background: var(--dd-green-light) !important;
+  color: var(--dd-green) !important;
+  border: 1px solid var(--dd-card-border) !important;
+}
+
+.btn-back:hover {
+  background: var(--dd-green-soft) !important;
+  box-shadow: 0 1px 4px rgba(61, 122, 74, 0.15) !important;
+}
+
+/* Postpone/Prescription Modal */
 .postpone-modal {
   margin-top: 16px;
   padding: 16px;
-  background: #f9f7f2;
-  border: 1px solid var(--border-color);
+  background: var(--dd-modal-bg);
+  border: 1px solid var(--dd-modal-border);
   border-radius: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .postpone-modal h4 {
   margin-bottom: 12px;
+  color: var(--dd-text-primary);
 }
 
 .postpone-modal label {
@@ -138,21 +233,41 @@
   font-weight: 600;
   margin: 8px 0 4px;
   font-size: 0.9rem;
+  color: var(--dd-text-secondary);
 }
 
-.postpone-modal input {
+.postpone-modal input,
+.postpone-modal textarea {
   width: 100%;
   padding: 8px 10px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--dd-input-border);
   border-radius: 6px;
   font-size: 0.9rem;
   box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  background: var(--dd-card-bg);
+  color: var(--dd-text-primary);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.postpone-modal input:focus,
+.postpone-modal textarea:focus {
+  outline: none;
+  border-color: var(--dd-input-focus);
+  box-shadow: 0 0 0 2px rgba(61, 122, 74, 0.15);
+}
+
+.postpone-modal textarea {
+  resize: vertical;
 }
 
 .modal-actions {
   display: flex;
   gap: 8px;
   margin-top: 12px;
+  flex-wrap: wrap;
 }
 
 .modal-actions button {
@@ -160,128 +275,291 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  color: white;
-  background: var(--primary-color);
+  color: #ffffff;
+  background: var(--dd-green);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  transition: background 0.2s, box-shadow 0.2s;
 }
 
-/* Orders Section */
-.orders-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.modal-actions button:hover {
+  background: var(--dd-green-hover);
+  box-shadow: 0 2px 6px rgba(61, 122, 74, 0.25);
 }
 
-.order-card {
-  background: #ffffff;
-  border: 1px solid #d5cfc4;
-  border-radius: 10px;
+.modal-actions button:focus-visible {
+  outline: 2px solid var(--dd-green);
+  outline-offset: 2px;
+}
+
+.modal-actions button.btn-cancel {
+  background: var(--dd-red);
+}
+
+.modal-actions button.btn-cancel:hover {
+  background: var(--dd-red-hover);
+  box-shadow: 0 2px 6px rgba(192, 57, 43, 0.25);
+}
+
+.modal-actions button.btn-cancel:focus-visible {
+  outline-color: var(--dd-red);
+}
+
+/* Section headings (Appointment Records, Medical Reports) */
+.dashboard .section-heading {
+  color: var(--dd-text-primary);
+  border-bottom: 2px solid var(--dd-green);
+  padding-bottom: 5px;
+  display: inline-block;
+}
+
+/* Patient profile header card */
+.dashboard .patient-header-card {
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.order-header {
+  border: 1px solid var(--dd-card-border);
+  border-radius: 8px;
+  background: var(--dd-card-bg);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-}
-
-.order-header h3 {
-  margin: 0;
-}
-
-.order-date {
-  font-size: 0.85rem;
-  color: #888;
-}
-
-.order-items ul {
-  margin: 6px 0;
-  padding-left: 20px;
-}
-
-.order-actions {
-  margin-top: 12px;
-}
-
-/* Medicines Section */
-.medicines-section {
-  display: flex;
-  flex-direction: column;
   gap: 20px;
 }
 
-.add-med-btn {
-  align-self: flex-start;
-  padding: 10px 24px;
-  background: #4a7c59;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+.dashboard .patient-header-card h2 {
+  margin: 0;
+  color: var(--dd-text-primary);
 }
 
-.add-med-btn:hover {
-  background: var(--primary-dark);
+.dashboard .patient-header-card p {
+  color: var(--dd-text-secondary);
+  margin: 4px 0 0 0;
 }
 
-.med-form {
+/* Avatar placeholder */
+.dashboard .avatar-placeholder {
+  border-radius: 50%;
+  background: var(--dd-avatar-bg);
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 400px;
-  padding: 20px;
-  background: #ffffff;
-  border: 1px solid #d5cfc4;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.med-form input {
-  padding: 10px;
-  border: 1px solid #c0b9aa;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  background: #fff;
-  color: var(--text-color);
-}
-
-.med-form button {
-  padding: 10px;
-  background: #4a7c59;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  align-items: center;
+  justify-content: center;
   font-weight: 600;
-  font-size: 0.95rem;
+  color: var(--dd-avatar-text);
 }
 
-.medicines-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
+/* Filter bar */
+.dashboard .filter-bar {
+  background: var(--dd-filter-bg);
+  border: 1px solid var(--dd-filter-border);
+  border-radius: 8px;
+  padding: 15px;
 }
 
-.medicine-card {
-  background: #ffffff;
-  border: 1px solid #d5cfc4;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+.dashboard .filter-bar label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--dd-text-secondary);
 }
 
-.medicine-card h3 {
-  margin-bottom: 6px;
-  color: #1a1a1a;
+.dashboard .filter-bar select,
+.dashboard .filter-bar input[type="date"] {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--dd-input-border);
+  background-color: var(--dd-card-bg);
+  color: var(--dd-text-primary);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
 }
 
-.medicine-card p {
-  color: #444;
-  margin: 4px 0;
+.dashboard .filter-bar select:focus,
+.dashboard .filter-bar input[type="date"]:focus {
+  border-color: var(--dd-input-focus);
+  box-shadow: 0 0 0 2px rgba(61, 122, 74, 0.15);
+}
+
+/* Patient search input */
+.dashboard .patient-search-input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--dd-input-border);
+  font-family: inherit;
+  background: var(--dd-card-bg);
+  color: var(--dd-text-primary);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  max-width: 100%;
+}
+
+.dashboard .patient-search-input:focus {
+  outline: none;
+  border-color: var(--dd-input-focus);
+  box-shadow: 0 0 0 2px rgba(61, 122, 74, 0.15);
+}
+
+/* Prescription box */
+.dashboard .prescription-box {
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--dd-prescription-bg);
+  border: 1px solid var(--dd-prescription-border);
+  border-radius: 6px;
+}
+
+.dashboard .prescription-box p {
+  white-space: pre-wrap;
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: var(--dd-text-primary);
+}
+
+/* Feedback/prescription display inside reports */
+.dashboard .feedback-display {
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--dd-prescription-bg);
+  border: 1px solid var(--dd-prescription-border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  color: var(--dd-text-primary);
+}
+
+/* Inline review modal */
+.dashboard .inline-review-modal {
+  margin-top: 15px;
+  padding: 15px;
+  background: var(--dd-card-bg);
+  border: 1px solid var(--dd-card-border);
+  border-radius: 6px;
+}
+
+.dashboard .inline-review-modal h4 {
+  margin: 0 0 10px 0;
+  color: var(--dd-text-primary);
+}
+
+.dashboard .inline-review-modal textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid var(--dd-input-border);
+  font-family: inherit;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  background: var(--dd-card-bg);
+  color: var(--dd-text-primary);
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dashboard .inline-review-modal textarea:focus {
+  outline: none;
+  border-color: var(--dd-input-focus);
+  box-shadow: 0 0 0 2px rgba(61, 122, 74, 0.15);
+}
+
+.dashboard .inline-review-modal textarea.input-error {
+  border-color: var(--dd-red);
+}
+
+/* Online/In-person type badge */
+.dashboard .type-badge {
+  font-size: 0.85rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.dashboard .type-badge.online {
+  background: var(--dd-online-bg);
+  color: var(--dd-online-text);
+}
+
+.dashboard .type-badge.inperson {
+  background: var(--dd-inperson-bg);
+  color: var(--dd-inperson-text);
+}
+
+/* Meet link */
+.dashboard .meet-link {
+  color: var(--dd-link);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.dashboard .meet-link:hover {
+  color: var(--dd-green-hover);
+  text-decoration: underline;
+}
+
+/* View Document link */
+.dashboard .doc-link {
+  display: inline-block;
+  margin: 10px 0;
+  color: var(--dd-link);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.dashboard .doc-link:hover {
+  color: var(--dd-green-hover);
+  text-decoration: underline;
+}
+
+/* Video call button */
+.dashboard .btn-video {
+  background: var(--dd-green) !important;
+}
+
+.dashboard .btn-video:hover {
+  background: var(--dd-green-hover) !important;
+}
+
+/* Secondary text */
+.dashboard .text-secondary {
+  color: var(--dd-text-secondary);
+}
+
+.dashboard .text-muted {
+  color: var(--dd-text-muted);
+}
+
+/* Report status badges */
+.dashboard .badge {
+  font-size: 0.80rem;
+  padding: 2px 8px;
+}
+
+.dashboard .badge.reviewed {
+  color: var(--dd-approved);
+}
+
+.dashboard .badge.pending {
+  color: var(--dd-pending);
+}
+
+/* Edit feedback button */
+.dashboard .btn-feedback-edit {
+  background: var(--dd-postpone) !important;
+}
+
+.dashboard .btn-feedback-edit:hover {
+  background: var(--dd-postpone-hover) !important;
+}
+
+.dashboard .btn-feedback-provide {
+  background: var(--dd-green) !important;
+}
+
+.dashboard .btn-feedback-provide:hover {
+  background: var(--dd-green-hover) !important;
+}
+
+/* No data message */
+.dashboard .no-data {
+  color: var(--dd-text-muted);
 }
 
 /* RESPONSIVENESS */
@@ -302,18 +580,8 @@
     text-align: center;
   }
 
-  .appointments-grid, .medicines-grid {
+  .appointments-grid {
     grid-template-columns: 1fr;
-  }
-
-  .order-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
-
-  .med-form {
-    max-width: 100%;
   }
 }
 

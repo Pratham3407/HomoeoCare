@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import API_URL from "../config";
+import { disconnectSocket } from "../realtime/clientSocket";
 
 export const AuthContext = createContext();
 
@@ -52,6 +53,9 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setShowReloginModal(false);
     setReloginError("");
+    // Close any authenticated real-time connection so the logged-out user no
+    // longer receives doctor/appointment events.
+    disconnectSocket();
     if (showToast) {
       toast.error(message || "Logged out");
     }

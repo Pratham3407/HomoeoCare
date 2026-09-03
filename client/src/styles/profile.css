@@ -364,40 +364,12 @@
   color: #444;
 }
 
-.order-items-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 6px 0;
-}
-
-.order-item-tag {
-  background: #f5f2ec;
-  padding: 3px 10px;
-  border-radius: 14px;
-  font-size: 0.82rem;
-  color: #555;
-}
-
 .record-footer {
   display: flex;
   gap: 12px;
   align-items: center;
   margin-top: 8px;
   flex-wrap: wrap;
-}
-
-.tracking-info {
-  font-size: 0.9rem;
-  color: #2980b9;
-  font-weight: 600;
-  margin: 6px 0 0;
-}
-
-.shipping-info {
-  font-size: 0.85rem;
-  color: #999;
-  margin-top: 4px;
 }
 
 /* Responsive */

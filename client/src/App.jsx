@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 
 import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/Home";
 import Register from "./pages/Register";
@@ -11,7 +12,6 @@ import Login from "./pages/Login";
 import About from "./pages/About";
 import BookAppointment from "./pages/BookAppointment";
 import DoctorDashboard from "./pages/DoctorDashboard";
-import OrderMedicine from "./pages/OrderMedicine";
 import PatientProfile from "./pages/PatientProfile";
 
 function App() {
@@ -42,9 +42,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/appointment" element={<BookAppointment />} />
-          <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-          <Route path="/order-medicine" element={<OrderMedicine />} />
-          <Route path="/profile" element={<PatientProfile />} />
+          <Route path="/doctor/dashboard" element={<ProtectedRoute role="doctor"><DoctorDashboard /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><PatientProfile /></ProtectedRoute>} />
         </Routes>
       </AnimatePresence>
     </>

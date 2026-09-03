@@ -1,17 +1,26 @@
 import "../styles/navbar.css";
 import { useState, useContext, useEffect } from "react";
-import { NavLink, Link, useLocation } from "react-router-dom";
+import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import { Link as ScrollLink } from "react-scroll";
 import logo from "../assets/logo.png";
 import { AuthContext } from "../context/AuthContext";
 
 function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
+
+  // Single authoritative logout handler shared by the desktop button and the
+  // mobile drawer. It mirrors the Profile page's working logout: clear auth via
+  // the centralized `logout`, then navigate to the public landing page.
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   // Prevent body scroll when drawer is open
   useEffect(() => {
@@ -100,9 +109,7 @@ function Navbar() {
                   <button className="nav-btn">My Profile</button>
                 </Link>
               )}
-              <button className="nav-btn" onClick={logout}>
-                Logout
-              </button>
+              <button className="nav-btn" onClick={handleLogout}>Logout</button>
             </>
           ) : (
             <>
@@ -195,7 +202,7 @@ function Navbar() {
                     My Profile
                   </Link>
                 )}
-                <button className="drawer-btn drawer-btn-secondary" onClick={() => { logout(); closeMenu(); }}>
+                <button className="drawer-btn drawer-btn-secondary" onClick={() => { closeMenu(); handleLogout(); }}>
                   Logout
                 </button>
               </>

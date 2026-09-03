@@ -9,6 +9,69 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const APP_NAME = "HomeoCare";
+const DOCTOR_DISPLAY = "Dr. Suketu Shah";
+
+/**
+ * Sends the online consultation invitation email containing the meeting
+ * link. `isUpdate` toggles the subject line for a changed link.
+ */
+const sendConsultationInvite = async ({ patientEmail, patientName, doctorName, date, time, meetLink, isUpdate = false }) => {
+  const subject = isUpdate
+    ? "Your consultation meeting link has been updated."
+    : "Your Online Consultation Meeting Link";
+  const intro = isUpdate
+    ? `${doctorName} has updated the meeting link for your upcoming consultation.`
+    : `${doctorName} has provided a meeting link for your upcoming consultation.`;
+
+  const mailOptions = {
+    from: `"${DOCTOR_DISPLAY} - ${APP_NAME}" <${process.env.DOCTOR_EMAIL}>`,
+    replyTo: process.env.DOCTOR_EMAIL,
+    to: patientEmail,
+    subject,
+    html: `
+      <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #e6e1d8; border-radius: 10px;">
+        <h2 style="color: #4a7c59; margin-bottom: 4px;">${APP_NAME}</h2>
+        <p style="color: #888; margin-top: 0;">${DOCTOR_DISPLAY} — Homoeopathic Consultant</p>
+        <hr style="border: none; border-top: 1px solid #e6e1d8; margin: 20px 0;" />
+
+        <p>Hello <strong>${patientName}</strong>,</p>
+
+        <p>${intro}</p>
+
+        <table style="width: 100%; margin: 20px 0; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 12px; font-weight: 600; color: #555;">Date</td>
+            <td style="padding: 8px 12px;">${date}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 12px; font-weight: 600; color: #555;">Time</td>
+            <td style="padding: 8px 12px;">${time}</td>
+          </tr>
+        </table>
+
+        <p style="color: #333;"><strong>Join your consultation:</strong></p>
+
+        <a href="${meetLink}" style="display: inline-block; padding: 14px 28px; background: #4a7c59; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+          Join Meeting
+        </a>
+
+        <p style="margin-top: 20px; color: #888; font-size: 14px;">
+          Meeting link:<br />
+          <a href="${meetLink}" style="color: #4a7c59; word-break: break-all;">${meetLink}</a>
+        </p>
+
+        <p style="color: #666; font-size: 14px;">Please use the link at the scheduled appointment time.</p>
+
+        <hr style="border: none; border-top: 1px solid #e6e1d8; margin: 24px 0;" />
+        <p style="color: #aaa; font-size: 12px;">Regards,<br />${DOCTOR_DISPLAY}<br />${APP_NAME}</p>
+      </div>
+    `,
+  };
+
+  return transporter.sendMail(mailOptions);
+};
+
 const sendMeetLink = async (patientEmail, patientName, meetLink, date, time) => {
   const mailOptions = {
     from: `"Dr. Suketu Shah - HomeoCare" <${process.env.DOCTOR_EMAIL}>`,
@@ -116,4 +179,4 @@ const sendReportReviewEmail = async (patientEmail, patientName, reportName) => {
   return transporter.sendMail(mailOptions);
 };
 
-module.exports = { sendMeetLink, sendPasswordResetEmail, sendReportReviewEmail };
+module.exports = { sendConsultationInvite, sendMeetLink, sendPasswordResetEmail, sendReportReviewEmail };
